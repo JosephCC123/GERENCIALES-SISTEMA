@@ -28,20 +28,20 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     // Módulo 2: Sitios Turísticos
-    Route::apiResource('sites', TouristSiteController::class);
+    Route::apiResource('tourist-sites', TouristSiteController::class);
     
     // Módulo 4: Visitantes
     Route::apiResource('visitors', VisitorController::class);
     
     // Módulo 5: Operadores Turísticos
-    Route::apiResource('operators', TourismOperatorController::class);
+    Route::apiResource('tourism-operators', TourismOperatorController::class);
     
     // Módulo 6: Alojamientos y Ocupación
     Route::apiResource('accommodations', AccommodationController::class);
     Route::apiResource('daily-occupancy', DailyOccupancyController::class);
     
     // Módulo 7: Guías Certificados
-    Route::apiResource('guides', CertifiedGuideController::class);
+    Route::apiResource('certified-guides', CertifiedGuideController::class);
     
     // Módulo 8: Capacidad y Tiempos de Espera
     Route::apiResource('capacity-logs', SiteCapacityLogController::class);

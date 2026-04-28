@@ -14,8 +14,8 @@ interface TouristSite {
   name: string;
   category: string;
   location: string;
-  capacity: number;
-  managing_entity?: { name: string };
+  capacity_standard: number;
+  admin_entity: string;
 }
 
 export function SitesPage() {
@@ -28,7 +28,7 @@ export function SitesPage() {
         const response = await axios.get('http://localhost:8001/api/tourist-sites', {
           headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
         });
-        setSites(response.data);
+        setSites(response.data.data || []);
       } catch (error) {
         console.error('Error fetching sites:', error);
       } finally {
@@ -77,11 +77,11 @@ export function SitesPage() {
               <div className="space-y-3 mt-6">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Users className="w-4 h-4" />
-                  <span>Capacidad: <b className="text-foreground">{site.capacity}</b> personas</span>
+                  <span>Capacidad: <b className="text-foreground">{site.capacity_standard}</b> personas</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <ShieldCheck className="w-4 h-4" />
-                  <span>Entidad: {site.managing_entity?.name || 'MINCUL'}</span>
+                  <span>Entidad: {site.admin_entity}</span>
                 </div>
               </div>
 

@@ -98,7 +98,7 @@ export function VisitorsPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        visitor.visitor_type === 'foreign' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                        visitor.visitor_type === 'extranjero' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
                       }`}>
                         {visitor.visitor_type.toUpperCase()}
                       </span>

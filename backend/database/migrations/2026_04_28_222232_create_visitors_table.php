@@ -14,12 +14,14 @@ return new class extends Migration
         Schema::create('visitors', function (Blueprint $table) {
             $table->id();
             $table->foreignId('site_id')->constrained('tourist_sites')->onDelete('cascade');
+            $table->string('full_name');
+            $table->string('document_number');
             $table->enum('visitor_type', ['nacional', 'extranjero']);
             $table->string('nationality');
             $table->date('entry_date');
             $table->time('entry_time');
             $table->time('exit_time')->nullable();
-            $table->string('ticket_number');
+            $table->string('ticket_number')->nullable();
             $table->timestamps();
         });
     }

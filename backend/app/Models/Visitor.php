@@ -8,6 +8,8 @@ class Visitor extends Model
 {
     protected $fillable = [
         'site_id',
+        'full_name',
+        'document_number',
         'visitor_type',
         'nationality',
         'entry_date',

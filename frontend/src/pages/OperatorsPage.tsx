@@ -11,8 +11,8 @@ import axios from 'axios';
 
 interface Operator {
   id: number;
-  name: string;
-  contact_name: string;
+  business_name: string;
+  ruc: string;
   email: string;
   phone: string;
   operator_type: string;
@@ -58,8 +58,8 @@ export function OperatorsPage() {
                     <Building2 className="w-6 h-6" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-xl">{op.name}</h3>
-                    <p className="text-sm text-muted-foreground">{op.operator_type}</p>
+                    <h3 className="font-bold text-xl">{op.business_name}</h3>
+                    <p className="text-sm text-muted-foreground capitalize">{op.operator_type}</p>
                   </div>
                 </div>
                 <button className="p-2 rounded-full hover:bg-muted text-muted-foreground">
@@ -79,7 +79,7 @@ export function OperatorsPage() {
               </div>
 
               <div className="mt-6 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">Contacto: {op.contact_name}</span>
+                <span className="text-xs text-muted-foreground font-medium">RUC: {op.ruc}</span>
                 <div className="flex gap-2">
                   <span className="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
                   <span className="text-[10px] font-bold text-green-600 uppercase">Activo</span>
