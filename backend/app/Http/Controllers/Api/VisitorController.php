@@ -8,9 +8,20 @@ use Illuminate\Http\Request;
 
 class VisitorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Visitor::with('site')->paginate(15);
+        $query = Visitor::with('site');
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('full_name', 'like', "%$search%")
+                  ->orWhere('document_number', 'like', "%$search%")
+                  ->orWhere('nationality', 'like', "%$search%");
+            });
+        }
+
+        return $query->orderBy('entry_date', 'desc')->orderBy('entry_time', 'desc')->paginate(15);
     }
 
     /**
@@ -46,7 +57,21 @@ class VisitorController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $visitor = Visitor::findOrFail($id);
+        
+        $validated = $request->validate([
+            'site_id' => 'sometimes|required|exists:tourist_sites,id',
+            'full_name' => 'sometimes|required|string|max:255',
+            'document_number' => 'sometimes|required|string|max:20',
+            'visitor_type' => 'sometimes|required|in:nacional,extranjero',
+            'nationality' => 'sometimes|required|string|max:255',
+            'entry_date' => 'sometimes|required|date',
+            'entry_time' => 'sometimes|required',
+            'ticket_number' => 'nullable|string|max:50',
+        ]);
+
+        $visitor->update($validated);
+        return response()->json($visitor);
     }
 
     /**

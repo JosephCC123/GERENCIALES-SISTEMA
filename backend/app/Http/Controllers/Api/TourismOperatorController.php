@@ -8,9 +8,20 @@ use Illuminate\Http\Request;
 
 class TourismOperatorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return TourismOperator::paginate(15);
+        $query = TourismOperator::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('business_name', 'like', "%$search%")
+                  ->orWhere('ruc', 'like', "%$search%")
+                  ->orWhere('license_number', 'like', "%$search%");
+            });
+        }
+
+        return $query->paginate(15);
     }
 
     public function store(Request $request)

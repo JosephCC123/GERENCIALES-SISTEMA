@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Card } from '../components/ui/card';
 import { 
   Building2, 
   Mail, 
   Phone, 
-  Trash2 
+  Trash2,
+  Edit2,
+  Search
 } from 'lucide-react';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { debounce } from 'lodash';
 
 interface Operator {
   id: number;
@@ -21,6 +24,8 @@ interface Operator {
   phone: string;
   operator_type: string;
   status: string;
+  license_number: string;
+  license_expiry: string;
 }
 
 export function OperatorsPage() {
@@ -28,6 +33,8 @@ export function OperatorsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingOperator, setEditingOperator] = useState<Operator | null>(null);
 
   const [formData, setFormData] = useState({
     business_name: '',
@@ -40,10 +47,10 @@ export function OperatorsPage() {
     status: 'Activo'
   });
 
-  const fetchOperators = async () => {
+  const fetchOperators = async (search = '') => {
     try {
       setLoading(true);
-      const response = await api.get('/tourism-operators');
+      const response = await api.get(`/tourism-operators?search=${search}`);
       setOperators(response.data.data || []);
     } catch (error) {
       console.error('Error fetching operators:', error);
@@ -56,6 +63,17 @@ export function OperatorsPage() {
     fetchOperators();
   }, []);
 
+  const debouncedSearch = useCallback(
+    debounce((term: string) => fetchOperators(term), 500),
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    debouncedSearch(value);
+  };
+
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Está seguro de eliminar este operador?')) return;
     try {
@@ -67,29 +85,53 @@ export function OperatorsPage() {
     }
   };
 
+  const handleEdit = (op: Operator) => {
+    setEditingOperator(op);
+    setFormData({
+      business_name: op.business_name,
+      ruc: op.ruc,
+      email: op.email || '',
+      phone: op.phone || '',
+      operator_type: op.operator_type,
+      license_number: op.license_number,
+      license_expiry: op.license_expiry,
+      status: op.status
+    });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.post('/tourism-operators', formData);
+      if (editingOperator) {
+        await api.put(`/tourism-operators/${editingOperator.id}`, formData);
+      } else {
+        await api.post('/tourism-operators', formData);
+      }
       setIsModalOpen(false);
-      setFormData({
-        business_name: '',
-        ruc: '',
-        email: '',
-        phone: '',
-        operator_type: 'agencia',
-        license_number: '',
-        license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-        status: 'Activo'
-      });
-      fetchOperators();
+      setEditingOperator(null);
+      resetForm();
+      fetchOperators(searchTerm);
     } catch (error) {
-      console.error('Error creating operator:', error);
-      alert('Error al crear operador');
+      console.error('Error saving operator:', error);
+      alert('Error al guardar operador');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      business_name: '',
+      ruc: '',
+      email: '',
+      phone: '',
+      operator_type: 'agencia',
+      license_number: '',
+      license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      status: 'Activo'
+    });
   };
 
   return (
@@ -98,8 +140,22 @@ export function OperatorsPage() {
         title="Operadores Turísticos" 
         description="Directorio de agencias y operadores certificados."
         buttonLabel="Nuevo Operador"
-        onButtonClick={() => setIsModalOpen(true)}
+        onButtonClick={() => {
+          setEditingOperator(null);
+          resetForm();
+          setIsModalOpen(true);
+        }}
       />
+
+      <div className="relative max-w-md w-full">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input 
+          placeholder="Buscar por razón social, RUC o licencia..." 
+          className="pl-10 rounded-full bg-card h-12 shadow-sm border-border focus:ring-primary" 
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {loading ? (
@@ -117,20 +173,30 @@ export function OperatorsPage() {
                     <p className="text-sm text-muted-foreground capitalize">{op.operator_type}</p>
                   </div>
                 </div>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-destructive hover:bg-destructive/10"
-                  onClick={() => handleDelete(op.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-primary hover:bg-primary/10 rounded-xl"
+                    onClick={() => handleEdit(op)}
+                  >
+                    <Edit2 className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-destructive hover:bg-destructive/10 rounded-xl"
+                    onClick={() => handleDelete(op.id)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mt-6">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4" />
-                  <span className="truncate">{op.email}</span>
+                  <Mail className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{op.email || 'N/A'}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Phone className="w-4 h-4" />
@@ -155,7 +221,7 @@ export function OperatorsPage() {
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Registrar Nuevo Operador"
+        title={editingOperator ? "Editar Operador" : "Registrar Nuevo Operador"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -253,7 +319,7 @@ export function OperatorsPage() {
               className="flex-1"
               disabled={submitting}
             >
-              {submitting ? 'Registrando...' : 'Registrar Operador'}
+              {submitting ? 'Guardando...' : (editingOperator ? 'Guardar Cambios' : 'Registrar Operador')}
             </Button>
           </div>
         </form>

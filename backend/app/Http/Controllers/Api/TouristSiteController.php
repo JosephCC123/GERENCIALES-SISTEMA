@@ -9,9 +9,20 @@ use App\Models\TouristSite;
 
 class TouristSiteController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $sites = TouristSite::with('managingEntity')->paginate(15);
+        $query = TouristSite::with('managingEntity');
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%$search%")
+                  ->orWhere('location', 'like', "%$search%")
+                  ->orWhere('type', 'like', "%$search%");
+            });
+        }
+
+        $sites = $query->paginate(15);
         $sites->getCollection()->transform(function ($site) {
             return [
                 'id' => $site->id,
@@ -39,6 +50,23 @@ class TouristSiteController extends Controller
 
         $site = TouristSite::create($validated);
         return response()->json($site, 201);
+    }
+
+    public function update(Request $request, string $id)
+    {
+        $site = TouristSite::findOrFail($id);
+        
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'type' => 'sometimes|required|string|max:255',
+            'location' => 'sometimes|required|string|max:255',
+            'capacity' => 'sometimes|required|integer|min:1',
+            'status' => 'sometimes|required|in:active,maintenance,closed',
+            'managing_entity_id' => 'nullable|exists:institutions,id',
+        ]);
+
+        $site->update($validated);
+        return response()->json($site);
     }
     public function destroy(string $id)
     {

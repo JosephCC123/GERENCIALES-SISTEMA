@@ -1,17 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { PageHeader } from '../components/PageHeader';
 import { Card } from '../components/ui/card';
 import { 
   BookOpen, 
   Languages, 
   Award,
-  Trash2
+  Trash2,
+  Edit2,
+  Search
 } from 'lucide-react';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
+import { debounce } from 'lodash';
 
 interface Guide {
   id: number;
@@ -19,6 +22,8 @@ interface Guide {
   license_number: string;
   languages: string;
   specialization: string;
+  license_expiry: string;
+  status: string;
 }
 
 export function GuidesPage() {
@@ -26,6 +31,8 @@ export function GuidesPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingGuide, setEditingGuide] = useState<Guide | null>(null);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -36,10 +43,10 @@ export function GuidesPage() {
     status: 'Activo'
   });
 
-  const fetchGuides = async () => {
+  const fetchGuides = async (search = '') => {
     try {
       setLoading(true);
-      const response = await api.get('/certified-guides');
+      const response = await api.get(`/certified-guides?search=${search}`);
       setGuides(response.data.data || []);
     } catch (error) {
       console.error('Error fetching guides:', error);
@@ -52,6 +59,17 @@ export function GuidesPage() {
     fetchGuides();
   }, []);
 
+  const debouncedSearch = useCallback(
+    debounce((term: string) => fetchGuides(term), 500),
+    []
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    debouncedSearch(value);
+  };
+
   const handleDelete = async (id: number) => {
     if (!window.confirm('¿Está seguro de eliminar este guía?')) return;
     try {
@@ -63,27 +81,49 @@ export function GuidesPage() {
     }
   };
 
+  const handleEdit = (guide: Guide) => {
+    setEditingGuide(guide);
+    setFormData({
+      full_name: guide.full_name,
+      license_number: guide.license_number,
+      license_expiry: guide.license_expiry,
+      languages: guide.languages,
+      specialization: guide.specialization,
+      status: guide.status
+    });
+    setIsModalOpen(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     try {
-      await api.post('/certified-guides', formData);
+      if (editingGuide) {
+        await api.put(`/certified-guides/${editingGuide.id}`, formData);
+      } else {
+        await api.post('/certified-guides', formData);
+      }
       setIsModalOpen(false);
-      setFormData({
-        full_name: '',
-        license_number: '',
-        license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0],
-        languages: '',
-        specialization: '',
-        status: 'Activo'
-      });
-      fetchGuides();
+      setEditingGuide(null);
+      resetForm();
+      fetchGuides(searchTerm);
     } catch (error) {
-      console.error('Error creating guide:', error);
-      alert('Error al crear guía');
+      console.error('Error saving guide:', error);
+      alert('Error al guardar guía');
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      full_name: '',
+      license_number: '',
+      license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0],
+      languages: '',
+      specialization: '',
+      status: 'Activo'
+    });
   };
 
   return (
@@ -92,8 +132,22 @@ export function GuidesPage() {
         title="Guías Certificados" 
         description="Gestión de profesionales autorizados por DIRCETUR."
         buttonLabel="Nuevo Guía"
-        onButtonClick={() => setIsModalOpen(true)}
+        onButtonClick={() => {
+          setEditingGuide(null);
+          resetForm();
+          setIsModalOpen(true);
+        }}
       />
+
+      <div className="relative max-w-md w-full">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input 
+          placeholder="Buscar por nombre, licencia o idiomas..." 
+          className="pl-10 rounded-full bg-card h-12 shadow-sm border-border focus:ring-primary" 
+          value={searchTerm}
+          onChange={handleSearchChange}
+        />
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {loading ? (
@@ -101,11 +155,19 @@ export function GuidesPage() {
         ) : (
           guides.map((guide) => (
             <Card key={guide.id} className="p-6 border-border flex flex-col items-center text-center relative group">
-              <div className="absolute top-4 right-4">
+              <div className="absolute top-4 right-4 flex gap-1">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-destructive hover:bg-destructive/10"
+                  className="text-primary hover:bg-primary/10 rounded-xl"
+                  onClick={() => handleEdit(guide)}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:bg-destructive/10 rounded-xl"
                   onClick={() => handleDelete(guide.id)}
                 >
                   <Trash2 className="w-4 h-4" />
@@ -143,7 +205,7 @@ export function GuidesPage() {
       <Modal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        title="Registrar Nuevo Guía Certificado"
+        title={editingGuide ? "Editar Guía Certificado" : "Registrar Nuevo Guía Certificado"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -214,7 +276,7 @@ export function GuidesPage() {
               className="flex-1"
               disabled={submitting}
             >
-              {submitting ? 'Registrando...' : 'Registrar Guía'}
+              {submitting ? 'Guardando...' : (editingGuide ? 'Guardar Cambios' : 'Registrar Guía')}
             </Button>
           </div>
         </form>

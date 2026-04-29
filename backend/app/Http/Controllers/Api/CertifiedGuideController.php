@@ -8,7 +8,21 @@ use Illuminate\Http\Request;
 
 class CertifiedGuideController extends Controller
 {
-    public function index() { return CertifiedGuide::paginate(15); }
+    public function index(Request $request)
+    {
+        $query = CertifiedGuide::query();
+
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('full_name', 'like', "%$search%")
+                  ->orWhere('license_number', 'like', "%$search%")
+                  ->orWhere('languages', 'like', "%$search%");
+            });
+        }
+
+        return $query->paginate(15);
+    }
 
     public function store(Request $request)
     {

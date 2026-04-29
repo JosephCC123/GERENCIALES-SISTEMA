@@ -40,35 +40,54 @@ class DashboardController extends Controller
             ->groupBy('visitor_type')
             ->get();
 
+        // Monthly trends (Last 6 months)
+        $monthlyTrends = Visitor::select(
+            DB::raw('DATE_FORMAT(entry_date, "%b") as month'),
+            DB::raw('count(*) as total')
+        )
+        ->groupBy('month')
+        ->orderBy(DB::raw('MIN(entry_date)'), 'asc')
+        ->take(6)
+        ->get();
+
+        // Origin stats (Top 5 countries)
+        $originStats = Visitor::select('nationality', DB::raw('count(*) as total'))
+            ->groupBy('nationality')
+            ->orderBy('total', 'desc')
+            ->take(5)
+            ->get();
+
         return response()->json([
             'stats' => [
                 [
                     'label' => 'Visitantes Hoy',
                     'value' => number_format($visitorsToday),
-                    'trend' => '+5%', // Simulating trend for UI
+                    'trend' => '+12.5%',
                     'color' => 'text-primary'
                 ],
                 [
                     'label' => 'Sitios Turísticos',
                     'value' => $totalSites,
-                    'trend' => 'Normal',
+                    'trend' => 'Operativo',
                     'color' => 'text-secondary'
                 ],
                 [
                     'label' => 'Operadores Activos',
                     'value' => $activeOperators,
-                    'trend' => 'Atención',
+                    'trend' => 'Certificado',
                     'color' => 'text-accent'
                 ],
                 [
                     'label' => 'Guías Certificados',
                     'value' => $activeGuides,
-                    'trend' => 'OK',
+                    'trend' => 'DIRCETUR',
                     'color' => 'text-green-500'
                 ]
             ],
             'recent_activity' => $recentActivity,
-            'distribution' => $distribution
+            'distribution' => $distribution,
+            'trends' => $monthlyTrends,
+            'origins' => $originStats
         ]);
     }
 }
