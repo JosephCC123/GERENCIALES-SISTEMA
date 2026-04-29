@@ -8,7 +8,8 @@ import {
   Building2, 
   BookOpen, 
   LogOut,
-  Menu
+  Menu,
+  FileBarChart
 } from 'lucide-react';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     { icon: Users, label: 'Visitantes', path: '/visitors' },
     { icon: Building2, label: 'Operadores', path: '/operators' },
     { icon: BookOpen, label: 'Guías', path: '/guides' },
+    { icon: FileBarChart, label: 'Reportes', path: '/reports' },
   ];
 
   return (

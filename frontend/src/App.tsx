@@ -5,6 +5,7 @@ import { SitesPage } from './pages/SitesPage';
 import { VisitorsPage } from './pages/VisitorsPage';
 import { OperatorsPage } from './pages/OperatorsPage';
 import { GuidesPage } from './pages/GuidesPage';
+import { ReportsPage } from './pages/ReportsPage';
 import { useAuthStore } from './store/authStore';
 import { MainLayout } from './components/MainLayout';
 
@@ -22,6 +23,7 @@ function App() {
       <Route path="/visitors" element={<ProtectedRoute><VisitorsPage /></ProtectedRoute>} />
       <Route path="/operators" element={<ProtectedRoute><OperatorsPage /></ProtectedRoute>} />
       <Route path="/guides" element={<ProtectedRoute><GuidesPage /></ProtectedRoute>} />
+      <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );
