@@ -28,14 +28,16 @@ export function ReportsPage() {
         return;
       }
 
-      // Dynamic CSV generation
+      // Dynamic CSV generation with UTF-8 BOM for Excel compatibility
       const headers = Object.keys(data[0]);
-      const csvContent = "data:text/csv;charset=utf-8," 
+      const csvContent = "\uFEFF" 
         + headers.join(",") + "\n" 
         + data.map((row: any) => headers.map(h => row[h]).join(",")).join("\n");
       
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement("a");
-      link.setAttribute("href", encodeURI(csvContent));
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
       link.setAttribute("download", `reporte_${entity}_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();

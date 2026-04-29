@@ -181,9 +181,11 @@ export function VisitorsPage() {
           onClick={() => {
             const headers = ['Nombre', 'Documento', 'Nacionalidad', 'Tipo', 'Sitio'];
             const rows = visitors.map(v => [v.full_name, v.document_number, v.nationality, v.visitor_type, v.site?.name || 'N/A']);
-            const csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
+            const csvContent = "\uFEFF" + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
-            link.setAttribute("href", encodeURI(csvContent));
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
             link.setAttribute("download", `visitantes_${new Date().toISOString().split('T')[0]}.csv`);
             document.body.appendChild(link);
             link.click();
