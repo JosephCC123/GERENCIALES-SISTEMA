@@ -7,6 +7,8 @@ import { OperatorsPage } from './pages/OperatorsPage';
 import { GuidesPage } from './pages/GuidesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { AccommodationsPage } from './pages/AccommodationsPage';
+import { AuditLogsPage } from './pages/AuditLogsPage';
+import { UsersPage } from './pages/UsersPage';
 import { useAuthStore } from './store/authStore';
 import { MainLayout } from './components/MainLayout';
 
@@ -26,8 +28,8 @@ function App() {
       <Route path="/guides" element={<ProtectedRoute><GuidesPage /></ProtectedRoute>} />
       <Route path="/reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
       <Route path="/accommodations" element={<ProtectedRoute><AccommodationsPage /></ProtectedRoute>} />
-      <Route path="/audit" element={<ProtectedRoute><div>Audit Log (Coming Soon)</div></ProtectedRoute>} />
-      <Route path="/users" element={<ProtectedRoute><div>User Management (Coming Soon)</div></ProtectedRoute>} />
+      <Route path="/audit" element={<ProtectedRoute><AuditLogsPage /></ProtectedRoute>} />
+      <Route path="/users" element={<ProtectedRoute><UsersPage /></ProtectedRoute>} />
       <Route path="/" element={<Navigate to="/dashboard" />} />
     </Routes>
   );

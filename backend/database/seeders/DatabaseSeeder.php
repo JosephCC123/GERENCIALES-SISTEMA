@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             RolePermissionSeeder::class,
             TouristSiteSeeder::class,
             TestDataSeeder::class,
+            AuditLogSeeder::class,
         ]);
     }
 }
