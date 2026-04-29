@@ -5,7 +5,7 @@ import {
   Building2, 
   Mail, 
   Phone, 
-  ExternalLink 
+  Trash2 
 } from 'lucide-react';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
@@ -55,6 +55,17 @@ export function OperatorsPage() {
   useEffect(() => {
     fetchOperators();
   }, []);
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Está seguro de eliminar este operador?')) return;
+    try {
+      await api.delete(`/tourism-operators/${id}`);
+      setOperators(operators.filter(o => o.id !== id));
+    } catch (error) {
+      console.error('Error deleting operator:', error);
+      alert('Error al eliminar operador');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,9 +117,14 @@ export function OperatorsPage() {
                     <p className="text-sm text-muted-foreground capitalize">{op.operator_type}</p>
                   </div>
                 </div>
-                <button className="p-2 rounded-full hover:bg-muted text-muted-foreground">
-                  <ExternalLink className="w-4 h-4" />
-                </button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(op.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
 
               <div className="grid grid-cols-2 gap-4 mt-6">

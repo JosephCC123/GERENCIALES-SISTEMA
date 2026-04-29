@@ -5,7 +5,7 @@ import {
   BookOpen, 
   Languages, 
   Award,
-  MoreVertical
+  Trash2
 } from 'lucide-react';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
@@ -52,6 +52,17 @@ export function GuidesPage() {
     fetchGuides();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Está seguro de eliminar este guía?')) return;
+    try {
+      await api.delete(`/certified-guides/${id}`);
+      setGuides(guides.filter(g => g.id !== id));
+    } catch (error) {
+      console.error('Error deleting guide:', error);
+      alert('Error al eliminar guía');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -91,7 +102,14 @@ export function GuidesPage() {
           guides.map((guide) => (
             <Card key={guide.id} className="p-6 border-border flex flex-col items-center text-center relative group">
               <div className="absolute top-4 right-4">
-                <MoreVertical className="w-4 h-4 text-muted-foreground cursor-pointer" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(guide.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
               </div>
 
               <div className="w-20 h-20 rounded-full bg-accent/10 text-accent flex items-center justify-center mb-4">

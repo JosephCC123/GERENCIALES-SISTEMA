@@ -5,7 +5,8 @@ import {
   User, 
   Calendar, 
   Globe, 
-  Search 
+  Search,
+  Trash2
 } from 'lucide-react';
 import api from '../lib/api';
 import { Input } from '../components/ui/input';
@@ -71,6 +72,17 @@ export function VisitorsPage() {
     fetchSites();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Está seguro de eliminar este registro?')) return;
+    try {
+      await api.delete(`/visitors/${id}`);
+      setVisitors(visitors.filter(v => v.id !== id));
+    } catch (error) {
+      console.error('Error deleting visitor:', error);
+      alert('Error al eliminar registro');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -105,9 +117,38 @@ export function VisitorsPage() {
         onButtonClick={() => setIsModalOpen(true)}
       />
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input placeholder="Buscar por nombre o documento..." className="pl-10 rounded-full bg-card" />
+      <div className="flex justify-between items-center max-w-full">
+        <div className="relative max-w-md w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input placeholder="Buscar por nombre o documento..." className="pl-10 rounded-full bg-card" />
+        </div>
+        <Button 
+          variant="outline" 
+          className="rounded-full flex items-center gap-2 border-primary text-primary hover:bg-primary/10"
+          onClick={() => {
+            const headers = ['Nombre', 'Documento', 'Nacionalidad', 'Tipo', 'Sitio'];
+            const rows = visitors.map(v => [
+              v.full_name,
+              v.document_number,
+              v.nationality,
+              v.visitor_type,
+              v.site?.name || 'N/A'
+            ]);
+            const csvContent = "data:text/csv;charset=utf-8," 
+              + headers.join(",") + "\n" 
+              + rows.map(e => e.join(",")).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `visitantes_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }}
+        >
+          Exportar CSV
+        </Button>
       </div>
 
       <Card className="border-border overflow-hidden">
@@ -163,7 +204,14 @@ export function VisitorsPage() {
                     </td>
                     <td className="px-6 py-4 text-sm font-medium">{visitor.site?.name || 'N/A'}</td>
                     <td className="px-6 py-4">
-                      <button className="text-primary text-xs font-bold hover:underline">Gestionar</button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="text-destructive hover:bg-destructive/10"
+                        onClick={() => handleDelete(visitor.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
                     </td>
                   </tr>
                 ))

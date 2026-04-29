@@ -5,7 +5,7 @@ import {
   MapPin, 
   Users, 
   ShieldCheck, 
-  MoreVertical 
+  Trash2 
 } from 'lucide-react';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
@@ -52,6 +52,17 @@ export function SitesPage() {
     fetchSites();
   }, []);
 
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('¿Está seguro de eliminar este sitio turístico?')) return;
+    try {
+      await api.delete(`/tourist-sites/${id}`);
+      setSites(sites.filter(s => s.id !== id));
+    } catch (error) {
+      console.error('Error deleting site:', error);
+      alert('Error al eliminar sitio');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -94,9 +105,14 @@ export function SitesPage() {
           {sites.map((site) => (
             <Card key={site.id} className="p-6 hover:shadow-lg transition-shadow border-border overflow-hidden relative group">
               <div className="absolute top-0 right-0 p-4">
-                <button className="text-muted-foreground hover:text-foreground">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(site.id)}
+                >
+                  <Trash2 className="w-5 h-5" />
+                </Button>
               </div>
               
               <div className="flex items-center gap-3 mb-4">

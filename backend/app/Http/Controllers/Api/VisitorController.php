@@ -54,6 +54,8 @@ class VisitorController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $visitor = Visitor::findOrFail($id);
+        $visitor->delete();
+        return response()->json(null, 204);
     }
 }

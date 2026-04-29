@@ -13,6 +13,7 @@ Route::get('/test', function() {
 Route::post('/login', [AuthController::class, 'login']);
 
 
+use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\VisitorController;
 use App\Http\Controllers\Api\TourismOperatorController;
 use App\Http\Controllers\Api\AccommodationController;
@@ -31,6 +32,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('tourist-sites', TouristSiteController::class);
     
     // Módulo 4: Visitantes
+    Route::get('/dashboard-stats', [DashboardController::class, 'index']);
     Route::apiResource('visitors', VisitorController::class);
     
     // Módulo 5: Operadores Turísticos

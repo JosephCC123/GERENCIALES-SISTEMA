@@ -40,4 +40,10 @@ class TouristSiteController extends Controller
         $site = TouristSite::create($validated);
         return response()->json($site, 201);
     }
+    public function destroy(string $id)
+    {
+        $site = TouristSite::findOrFail($id);
+        $site->delete();
+        return response()->json(null, 204);
+    }
 }
