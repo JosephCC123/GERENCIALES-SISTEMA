@@ -7,7 +7,7 @@ import {
   Globe, 
   Search 
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../lib/api';
 import { Input } from '../components/ui/input';
 
 interface Visitor {
@@ -26,9 +26,7 @@ export function VisitorsPage() {
   useEffect(() => {
     const fetchVisitors = async () => {
       try {
-        const response = await axios.get('http://localhost:8001/api/visitors', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
-        });
+        const response = await api.get('/visitors');
         setVisitors(response.data.data || []);
       } catch (error) {
         console.error('Error fetching visitors:', error);

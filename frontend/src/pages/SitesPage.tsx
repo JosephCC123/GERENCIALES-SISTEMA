@@ -7,7 +7,7 @@ import {
   ShieldCheck, 
   MoreVertical 
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../lib/api';
 
 interface TouristSite {
   id: number;
@@ -25,9 +25,7 @@ export function SitesPage() {
   useEffect(() => {
     const fetchSites = async () => {
       try {
-        const response = await axios.get('http://localhost:8001/api/tourist-sites', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
-        });
+        const response = await api.get('/tourist-sites');
         setSites(response.data.data || []);
       } catch (error) {
         console.error('Error fetching sites:', error);

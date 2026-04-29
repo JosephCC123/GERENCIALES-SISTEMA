@@ -7,7 +7,7 @@ import {
   Award,
   MoreVertical
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../lib/api';
 
 interface Guide {
   id: number;
@@ -24,9 +24,7 @@ export function GuidesPage() {
   useEffect(() => {
     const fetchGuides = async () => {
       try {
-        const response = await axios.get('http://localhost:8001/api/certified-guides', {
-          headers: { Authorization: `Bearer ${localStorage.getItem('auth_token')}` }
-        });
+        const response = await api.get('/certified-guides');
         setGuides(response.data.data || []);
       } catch (error) {
         console.error('Error fetching guides:', error);
