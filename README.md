@@ -78,9 +78,30 @@ Directorio de guías autorizados para operar en la región.
 
 ---
 
-## 💻 4. Stack Tecnológico Detallado
+## 🗄️ 6. Base de Datos y Replicación
 
-### 4.1. Frontend
+Para asegurar que todos los desarrolladores y evaluadores cuenten con la misma información, la base de datos se distribuye mediante **Migraciones** y **Seeders** (Siembras).
+
+### 6.1. Esquema de Datos
+El sistema utiliza un modelo relacional normalizado:
+*   **Migraciones:** Ubicadas en `backend/database/migrations/`, definen la estructura de tablas, tipos de datos e índices.
+*   **Seeders:** Ubicados en `backend/database/seeders/`, contienen la lógica para poblar el sistema.
+
+### 6.2. Generación de Datos Masivos
+El proyecto incluye un `TestDataSeeder` avanzado que utiliza la librería **Faker** (localizada en `es_PE`) para inyectar:
+*   **300+ Visitantes** con nombres, documentos y procedencias realistas.
+*   **60 Operadores** con RUCs y licencias simuladas.
+*   **50 Guías** con combinaciones aleatorias de idiomas y especialidades.
+
+> [!TIP]
+> Para reconstruir la base de datos completa con todos los datos de prueba, ejecute:
+> `php artisan migrate:fresh --seed`
+
+---
+
+## 💻 7. Stack Tecnológico Detallado
+
+### 7.1. Frontend
 *   **React 19:** Última versión con mejoras en el manejo de concurrencia.
 *   **Tailwind CSS 4:** Estilizado mediante variables CSS modernas y utilidades de espaciado dinámico.
 *   **Zustand:** Gestión de estado global con persistencia local para mantener la sesión del usuario.
