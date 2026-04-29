@@ -14,7 +14,7 @@ import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 
 interface TouristSite {
   id: number;

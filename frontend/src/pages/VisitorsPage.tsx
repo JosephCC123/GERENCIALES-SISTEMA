@@ -14,7 +14,7 @@ import { Input } from '../components/ui/input';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
-import { debounce } from 'lodash';
+import { debounce } from 'lodash-es';
 
 interface Visitor {
   id: number;
