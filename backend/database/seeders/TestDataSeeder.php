@@ -19,43 +19,43 @@ class TestDataSeeder extends Seeder
             return;
         }
 
-        // Create 100 Visitors with diverse data
-        for ($i = 0; $i < 100; $i++) {
+        // Create 300 Visitors with diverse data
+        for ($i = 0; $i < 300; $i++) {
             Visitor::create([
                 'site_id' => $sites->random()->id,
                 'full_name' => $faker->name,
                 'document_number' => $faker->numerify('########'),
                 'visitor_type' => $faker->randomElement(['nacional', 'extranjero']),
                 'nationality' => $faker->country,
-                'entry_date' => now()->subDays(rand(0, 60))->toDateString(),
+                'entry_date' => now()->subDays(rand(0, 90))->toDateString(),
                 'entry_time' => $faker->time(),
                 'ticket_number' => 'T-' . $faker->unique()->randomNumber(6)
             ]);
         }
 
-        // Create 30 Operators
-        for ($i = 0; $i < 30; $i++) {
+        // Create 60 Operators
+        for ($i = 0; $i < 60; $i++) {
             TourismOperator::create([
-                'business_name' => $faker->company . ' ' . $faker->randomElement(['Tours', 'Expeditions', 'Travel', 'Adventure']),
+                'business_name' => $faker->company . ' ' . $faker->randomElement(['Tours', 'Expeditions', 'Travel', 'Adventure', 'Services']),
                 'ruc' => '20' . $faker->unique()->numerify('#########'),
                 'email' => $faker->companyEmail,
                 'phone' => $faker->phoneNumber,
                 'operator_type' => $faker->randomElement(['agencia', 'hotel', 'transporte']),
                 'license_number' => 'LIC-' . $faker->unique()->randomNumber(6),
-                'license_expiry' => $faker->dateTimeBetween('+1 year', '+4 years')->format('Y-m-d'),
+                'license_expiry' => $faker->dateTimeBetween('+1 year', '+5 years')->format('Y-m-d'),
                 'status' => $faker->randomElement(['Activo', 'Pendiente', 'Vencido', 'Suspendido']),
                 'address' => $faker->address
             ]);
         }
 
-        // Create 25 Certified Guides
-        for ($i = 0; $i < 25; $i++) {
+        // Create 50 Certified Guides
+        for ($i = 0; $i < 50; $i++) {
             CertifiedGuide::create([
                 'full_name' => $faker->name,
                 'license_number' => 'G-' . $faker->unique()->randomNumber(5),
-                'license_expiry' => $faker->dateTimeBetween('+6 months', '+5 years')->format('Y-m-d'),
-                'languages' => $faker->randomElement(['Español, Inglés', 'Español, Francés, Inglés', 'Español, Alemán', 'Español, Quechua, Inglés', 'Español, Italiano']),
-                'specialization' => $faker->randomElement(['Arqueología', 'Montañismo', 'Turismo Cultural', 'Gastronomía Local', 'Ecoturismo']),
+                'license_expiry' => $faker->dateTimeBetween('+1 year', '+6 years')->format('Y-m-d'),
+                'languages' => $faker->randomElement(['Español, Inglés', 'Español, Francés, Inglés', 'Español, Alemán, Ruso', 'Español, Quechua, Inglés', 'Español, Portugués']),
+                'specialization' => $faker->randomElement(['Arqueología', 'Montañismo', 'Turismo Cultural', 'Aves y Naturaleza', 'Misticismo']),
                 'phone' => $faker->phoneNumber,
                 'email' => $faker->safeEmail,
                 'status' => $faker->randomElement(['Activo', 'Vencido'])

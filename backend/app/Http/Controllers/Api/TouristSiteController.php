@@ -25,4 +25,19 @@ class TouristSiteController extends Controller
         });
         return $sites;
     }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
+            'location' => 'required|string|max:255',
+            'capacity' => 'required|integer|min:1',
+            'status' => 'required|in:active,maintenance,closed',
+            'managing_entity_id' => 'nullable|exists:institutions,id',
+        ]);
+
+        $site = TouristSite::create($validated);
+        return response()->json($site, 201);
+    }
 }

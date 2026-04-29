@@ -18,7 +18,19 @@ class VisitorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'site_id' => 'required|exists:tourist_sites,id',
+            'full_name' => 'required|string|max:255',
+            'document_number' => 'required|string|max:20',
+            'visitor_type' => 'required|in:nacional,extranjero',
+            'nationality' => 'required|string|max:255',
+            'entry_date' => 'required|date',
+            'entry_time' => 'required',
+            'ticket_number' => 'nullable|string|max:50',
+        ]);
+
+        $visitor = Visitor::create($validated);
+        return response()->json($visitor, 201);
     }
 
     /**

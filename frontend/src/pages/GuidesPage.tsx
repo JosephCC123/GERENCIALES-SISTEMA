@@ -8,6 +8,10 @@ import {
   MoreVertical
 } from 'lucide-react';
 import api from '../lib/api';
+import { Modal } from '../components/ui/Modal';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
+import { Label } from '../components/ui/label';
 
 interface Guide {
   id: number;
@@ -20,20 +24,56 @@ interface Guide {
 export function GuidesPage() {
   const [guides, setGuides] = useState<Guide[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [formData, setFormData] = useState({
+    full_name: '',
+    license_number: '',
+    license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0],
+    languages: '',
+    specialization: '',
+    status: 'Activo'
+  });
+
+  const fetchGuides = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/certified-guides');
+      setGuides(response.data.data || []);
+    } catch (error) {
+      console.error('Error fetching guides:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchGuides = async () => {
-      try {
-        const response = await api.get('/certified-guides');
-        setGuides(response.data.data || []);
-      } catch (error) {
-        console.error('Error fetching guides:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchGuides();
   }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+    try {
+      await api.post('/certified-guides', formData);
+      setIsModalOpen(false);
+      setFormData({
+        full_name: '',
+        license_number: '',
+        license_expiry: new Date(new Date().setFullYear(new Date().getFullYear() + 2)).toISOString().split('T')[0],
+        languages: '',
+        specialization: '',
+        status: 'Activo'
+      });
+      fetchGuides();
+    } catch (error) {
+      console.error('Error creating guide:', error);
+      alert('Error al crear guía');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
@@ -41,11 +81,12 @@ export function GuidesPage() {
         title="Guías Certificados" 
         description="Gestión de profesionales autorizados por DIRCETUR."
         buttonLabel="Nuevo Guía"
+        onButtonClick={() => setIsModalOpen(true)}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {loading ? (
-          [1, 2, 3, 4].map(i => <div key={i} className="h-64 bg-muted animate-pulse rounded-2xl" />)
+          [1, 2, 3, 4, 5, 6, 7, 8].map(i => <div key={i} className="h-64 bg-muted animate-pulse rounded-2xl" />)
         ) : (
           guides.map((guide) => (
             <Card key={guide.id} className="p-6 border-border flex flex-col items-center text-center relative group">
@@ -65,11 +106,11 @@ export function GuidesPage() {
               <div className="w-full mt-6 space-y-3">
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <Languages className="w-4 h-4" />
-                  <span>{guide.languages}</span>
+                  <span className="truncate">{guide.languages}</span>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
                   <BookOpen className="w-4 h-4" />
-                  <span>{guide.specialization}</span>
+                  <span className="truncate">{guide.specialization}</span>
                 </div>
               </div>
 
@@ -80,6 +121,86 @@ export function GuidesPage() {
           ))
         )}
       </div>
+
+      <Modal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        title="Registrar Nuevo Guía Certificado"
+      >
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="full_name">Nombres y Apellidos</Label>
+            <Input 
+              id="full_name" 
+              required 
+              value={formData.full_name}
+              onChange={e => setFormData({...formData, full_name: e.target.value})}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="license_number">N° Carnet / Licencia</Label>
+              <Input 
+                id="license_number" 
+                required 
+                value={formData.license_number}
+                onChange={e => setFormData({...formData, license_number: e.target.value})}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="license_expiry">Vencimiento</Label>
+              <Input 
+                id="license_expiry" 
+                type="date" 
+                required 
+                value={formData.license_expiry}
+                onChange={e => setFormData({...formData, license_expiry: e.target.value})}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="languages">Idiomas (separados por coma)</Label>
+            <Input 
+              id="languages" 
+              required 
+              placeholder="Ej. Español, Inglés, Quechua"
+              value={formData.languages}
+              onChange={e => setFormData({...formData, languages: e.target.value})}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="specialization">Especialidad</Label>
+            <Input 
+              id="specialization" 
+              required 
+              placeholder="Ej. Arqueología, Aventura"
+              value={formData.specialization}
+              onChange={e => setFormData({...formData, specialization: e.target.value})}
+            />
+          </div>
+
+          <div className="pt-4 flex gap-3">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setIsModalOpen(false)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              className="flex-1"
+              disabled={submitting}
+            >
+              {submitting ? 'Registrando...' : 'Registrar Guía'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
