@@ -4,135 +4,117 @@
 [![React](https://img.shields.io/badge/React-19.x-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-4.x-06B6D4?logo=tailwindcss)](https://tailwindcss.com/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Database](https://img.shields.io/badge/Database-MySQL-4479A1?logo=mysql)](https://www.mysql.com/)
 
 ---
 
 ## 📖 1. Resumen Ejecutivo
-Este proyecto es una plataforma de **Business Intelligence (BI)** y gestión operativa diseñada específicamente para la **Municipalidad Provincial del Cusco**. Su objetivo es centralizar la información dispersa del sector turístico para permitir una toma de decisiones basada en datos reales, optimizando el flujo de visitantes y la fiscalización de servicios.
+Este proyecto es una plataforma de **Business Intelligence (BI)** y gestión operativa diseñada para la **Municipalidad Provincial del Cusco**. Su objetivo es centralizar la información dispersa del sector turístico para permitir una toma de decisiones basada en datos reales, optimizando el flujo de visitantes y la fiscalización de servicios mediante una arquitectura moderna de Sistemas de Información Gerencial (SIG).
 
 ---
 
-## 🏗️ 2. Arquitectura del Sistema
+## 🏗️ 2. Arquitectura del Sistema (Full Stack)
 
-El sistema utiliza una arquitectura de **Desacoplamiento Total** entre el Cliente y el Servidor.
+El sistema utiliza una arquitectura de **Desacoplamiento Total** basada en el patrón de diseño Cliente-Servidor, lo que garantiza escalabilidad e independencia tecnológica.
 
-### 2.1. Flujo de Datos
+### 2.1. Diagrama de Flujo de Datos
 ```mermaid
 graph LR
-    A[Frontend React] -- Axios + Sanctum --> B[API Gateway Laravel]
-    B -- Eloquent ORM --> C[(Database SQLite/MySQL)]
-    C --> B
+    A[Frontend React 19] -- Peticiones REST (Axios) --> B[API Gateway Laravel 11]
+    B -- Sanctum Auth Middleware --> C{Validación de Token}
+    C -- Sí --> D[Controladores de Recurso]
+    D -- Eloquent ORM --> E[(Base de Datos MySQL)]
+    E --> D
+    D --> B
     B --> A
-    subgraph "Seguridad"
-    D[Sanctum Token]
-    E[Middleware Auth]
+    subgraph "Seguridad & Persistencia"
+    F[Zustand LocalStorage]
+    G[CSRF Protection]
     end
 ```
 
 ---
 
-## 🖥️ 3. Guía Detallada de Módulos y Páginas
+## 💻 3. Stack Tecnológico de Vanguardia
 
-El sistema se divide en 5 módulos principales, cada uno diseñado con una interfaz **Premium Glassmorphism** que prioriza la legibilidad y la estética moderna.
+### 3.1. Frontend (Interfaz de Usuario Premium)
+*   **React 19 (SPA):** Utiliza el nuevo compilador de React y mejoras en el manejo de transiciones para una experiencia de usuario fluida sin recargas de página.
+*   **TypeScript 5:** Tipado estricto en toda la aplicación, desde las interfaces de la API hasta las propiedades de los componentes, garantizando un código libre de errores de referencia.
+*   **Tailwind CSS 4 + Shadcn UI:** Arquitectura visual basada en **Glassmorphism**. Se utilizan efectos de `backdrop-blur`, gradientes complejos (Linear & Radial) y una paleta de colores curada para el sector gubernamental/turístico.
+*   **Zustand con Persist Middleware:** Gestión de estado global que mantiene la sesión del usuario (Token Sanctum) persistente incluso tras recargar el navegador.
+*   **Axios Interceptors:** Capa de comunicación que intercepta cada petición saliente para inyectar el Header `Authorization: Bearer [token]` y maneja globalmente los errores 401 (Sesión expirada).
+*   **Lucide React:** Sistema de iconos vectoriales ligeros que mantienen la consistencia visual en todos los módulos.
+*   **Recharts:** Librería de visualización de datos de alto rendimiento para la generación de dashboards estadísticos.
 
-### 📊 3.1. Dashboard (Centro de Control Gerencial)
-Es el núcleo del sistema, donde se consolidan los indicadores clave de desempeño (KPIs).
-*   **Monitor de Capacidad en Tiempo Real:** Integración con **Google Maps API** configurado con filtros de contraste personalizados (Modo Oscuro Adaptativo) para visualizar los puntos críticos de Cusco.
-*   **Tarjetas de Resumen (Counters):** Muestra el conteo total de visitantes hoy, sitios operativos, operadores activos y guías disponibles.
-*   **Gráficos Estadísticos:** Implementación de gráficos circulares y de barras (Recharts) que muestran la proporción de visitantes extranjeros vs. nacionales y la tendencia de ocupación semanal.
-*   **UI/UX:** Paneles traslúcidos con bordes sutiles y efectos de iluminación dinámica.
-
-### 👤 3.2. Registro de Visitantes (Flujo de Ingresos)
-Módulo crítico para el control de la demanda turística.
-*   **Tabla de Gestión Avanzada:** Listado paginado con carga asíncrona que muestra nombre, documento, nacionalidad y sitio de destino.
-*   **Buscador Inteligente:** Filtro en tiempo real por nombre o número de documento.
-*   **Modal de Registro "Entrada":** Formulario de alta velocidad para registrar nuevos ingresos. Incluye:
-    *   Validación de tipo de visitante (Etiquetas visuales Verde/Azul).
-    *   Selección dinámica de sitios arqueológicos desde la base de datos.
-    *   Registro automático de hora y fecha de ingreso.
-*   **Indicadores Visuales:** Badges estilizados para diferenciar rápidamente el origen del turista.
-
-### 🏺 3.3. Sitios Turísticos (Gestión de Atractivos)
-Monitoreo de la oferta cultural y natural de la provincia.
-*   **Vista de Rejilla (Grid):** Tarjetas interactivas para cada atractivo (Ej. Machu Picchu, Sacsayhuaman, Ollantaytambo).
-*   **Indicadores de Capacidad:** Visualización clara del aforo máximo permitido por sitio.
-*   **Estados Operativos:** Etiquetas de estado dinámicas: `Operativo` (Verde), `Mantenimiento` (Amarillo), `Cerrado` (Rojo).
-*   **Modal de Nuevo Sitio:** Permite dar de alta nuevos atractivos definiendo su categoría (Arqueológico, Natural, Museo) y capacidad de carga.
-
-### 🏢 3.4. Operadores Turísticos (Directorio de Servicios)
-Herramienta de fiscalización y gestión de la oferta privada formal.
-*   **Fichas de Empresa:** Visualización detallada de cada agencia o establecimiento de hospedaje.
-*   **Validación de RUC:** Espacio dedicado para el registro de los 11 dígitos fiscales.
-*   **Contactabilidad:** Acceso rápido a Email y Teléfono de cada operador registrado.
-*   **Control de Licencias:** Seguimiento visual de la vigencia de la licencia DIRCETUR.
-*   **Filtros por Tipo:** Diferenciación entre Agencias de Viajes, Hoteles y Transporte Turístico.
-
-### 🎓 3.5. Guías Certificados (Gestión de Profesionales)
-Directorio de guías autorizados para operar en la región.
-*   **Perfiles Profesionales:** Tarjetas tipo "Badge" con la foto (Avatar Award) y nombre del guía.
-*   **Gestión de Idiomas:** Visualización de las competencias lingüísticas (Ej. Inglés, Francés, Quechua).
-*   **Especialidades:** Etiquetas de especialidad como "Arqueología", "Aventura" o "Gastronomía".
-*   **Seguimiento de Licencias:** Registro del número de carnet y fecha de vencimiento profesional.
-*   **Modal de Registro:** Formulario optimizado para el alta de nuevos guías con selección de múltiples idiomas.
+### 3.2. Backend (Arquitectura de Microservicios API)
+*   **Laravel 11:** El framework PHP más avanzado del mercado, configurado en modo API-only para minimizar el overhead de memoria.
+*   **Laravel Sanctum:** Implementación de autenticación mediante tokens de acceso personal para asegurar las rutas críticas del sistema.
+*   **Eloquent ORM:** Implementación de relaciones complejas como `BelongsTo` y `HasMany` para vincular visitantes con sus respectivos atractivos turísticos de manera eficiente.
+*   **Validación de Datos (Request Validation):** Capa de seguridad que filtra y valida cada entrada de datos (RUC de 11 dígitos, formatos de fecha ISO, tipos de documento) antes de llegar a la base de datos.
+*   **FakerPHP Customization:** Generación de datos masivos (Siembra) con localización en `es_PE` para nombres, empresas y distritos cusqueños realistas.
 
 ---
 
-## 🗄️ 6. Base de Datos y Replicación
+## 🗄️ 4. Especificación Detallada de la Base de Datos (MySQL)
 
-Para asegurar que todos los desarrolladores y evaluadores cuenten con la misma información, la base de datos se distribuye mediante **Migraciones** y **Seeders** (Siembras).
+El sistema utiliza **MySQL** como motor de persistencia relacional, garantizando la integridad referencial y la capacidad de manejar miles de registros simultáneos.
 
-### 6.1. Esquema de Datos
-El sistema utiliza un modelo relacional normalizado:
-*   **Migraciones:** Ubicadas en `backend/database/migrations/`, definen la estructura de tablas, tipos de datos e índices.
-*   **Seeders:** Ubicados en `backend/database/seeders/`, contienen la lógica para poblar el sistema.
+### 4.1. Entidades y Esquema de Datos
+| Tabla | Propósito | Campos Críticos |
+| :--- | :--- | :--- |
+| **Visitors** | Registro de ingresos | `full_name`, `document_number`, `visitor_type`, `nationality`, `site_id`, `entry_date`, `ticket_number` |
+| **Tourist_Sites** | Atractivos turísticos | `name`, `category`, `location`, `capacity_standard`, `status`, `admin_entity` |
+| **Tourism_Operators**| Directorio de empresas| `business_name`, `ruc` (11), `operator_type`, `email`, `license_number`, `status` |
+| **Certified_Guides** | Profesionales autorizados| `full_name`, `license_number`, `languages`, `specialization`, `phone`, `status` |
+| **Users** | Control de acceso | `name`, `email`, `password`, `role_id`, `last_login_at` |
 
-### 6.2. Generación de Datos Masivos
-El proyecto incluye un `TestDataSeeder` avanzado que utiliza la librería **Faker** (localizada en `es_PE`) para inyectar:
-*   **300+ Visitantes** con nombres, documentos y procedencias realistas.
-*   **60 Operadores** con RUCs y licencias simuladas.
-*   **50 Guías** con combinaciones aleatorias de idiomas y especialidades.
+### 4.2. Replicación y Despliegue de Datos
+Para replicar el entorno de datos masivo utilizado en las pruebas de estrés:
+1.  **Migraciones:** Estructuran el esquema relacional con llaves foráneas y restricciones de integridad.
+2.  **Siembra Avanzada (Seeders):**
+    *   **300+ Visitantes:** Generados con algoritmos de aleatoriedad temporal para los últimos 3 meses.
+    *   **60 Operadores:** Simulando el parque empresarial de Cusco con RUCs únicos.
+    *   **50 Guías:** Con perfiles lingüísticos diversos (Inglés, Francés, Alemán, Quechua).
 
-> [!TIP]
-> Para reconstruir la base de datos completa con todos los datos de prueba, ejecute:
+> [!IMPORTANT]
+> Para reconstruir la base de datos con toda la información estratégica, ejecute:
 > `php artisan migrate:fresh --seed`
 
 ---
 
-## 💻 7. Stack Tecnológico Detallado
+## 🖥️ 5. Guía de Módulos y Páginas Funcionales
 
-### 7.1. Frontend
-*   **React 19:** Última versión con mejoras en el manejo de concurrencia.
-*   **Tailwind CSS 4:** Estilizado mediante variables CSS modernas y utilidades de espaciado dinámico.
-*   **Zustand:** Gestión de estado global con persistencia local para mantener la sesión del usuario.
-*   **Axios:** Cliente HTTP con interceptores para inyectar automáticamente el token de autenticación Sanctum en cada petición.
+### 📊 Dashboard (Monitor Gerencial)
+Centro de inteligencia con **Google Maps API** integrado. Visualiza en tiempo real la saturación de los sitios mediante indicadores de capacidad y gráficos de tendencia de visitantes (Nacional vs. Extranjero).
 
-### 4.2. Backend
-*   **Laravel 11:** Arquitectura de API limpia y escalable.
-*   **Eloquent ORM:** Relaciones complejas (Many-to-One) entre Visitantes y Sitios Turísticos.
-*   **FakerPHP Custom Seeder:** Lógica personalizada para generar 300+ registros masivos con coherencia geográfica y temporal.
-*   **Laravel Sanctum:** Sistema de autenticación ligero basado en tokens para asegurar que solo usuarios autorizados accedan a la información gerencial.
+### 👥 Registro de Visitantes
+Sistema de control de ingresos con búsqueda indexada por número de documento y modal de registro rápido conectado directamente al controlador de Laravel.
 
----
+### 🏺 Sitios Turísticos
+Gestión de activos culturales con sistema de estados dinámicos. Permite monitorear si un sitio está **Operativo**, en **Mantenimiento** o **Cerrado**, mostrando siempre su capacidad de carga máxima.
 
-## 🛠️ 5. Instrucciones de Despliegue
-
-### Configuración del Servidor (Backend)
-1.  Clonar y entrar a `/backend`.
-2.  `composer install`
-3.  `cp .env.example .env` (Asegurar `DB_CONNECTION=sqlite`).
-4.  `touch database/database.sqlite`
-5.  `php artisan migrate:fresh --seed` (Esto poblará el sistema con los **300+ registros de prueba**).
-6.  `php artisan serve --port=8001`
-
-### Configuración del Cliente (Frontend)
-1.  Entrar a `/frontend`.
-2.  `npm install`
-3.  `npm run dev` (Abrirá la interfaz en `http://localhost:5173`).
+### 🏢 Operadores y 🎓 Guías
+Directorios profesionales con validación de credenciales (RUC y Licencias DIRCETUR). Incluye filtros avanzados por tipo de servicio e idiomas.
 
 ---
 
-## 📈 6. Impacto Institucional
-La implementación de este SIG permite a la gestión municipal de Cusco pasar de una **reacción basada en intuición** a una **planificación basada en evidencia**, cumpliendo con los estándares de interoperabilidad del Estado Peruano.
+## 🛠️ 6. Instrucciones de Instalación
+
+1.  **Backend:**
+    ```bash
+    cd backend
+    composer install
+    # Configurar .env con DB_CONNECTION=mysql, DB_PORT=3307, etc.
+    php artisan migrate:fresh --seed
+    php artisan serve --port=8001
+    ```
+2.  **Frontend:**
+    ```bash
+    cd ../frontend
+    npm install
+    npm run dev
+    ```
+
+---
 
 **Cusco - Ombligo del Mundo 🌍**
