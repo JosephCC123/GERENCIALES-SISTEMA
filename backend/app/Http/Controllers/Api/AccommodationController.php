@@ -8,20 +8,32 @@ use Illuminate\Http\Request;
 
 class AccommodationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Accommodation::with('operator')->paginate(15);
+        $query = Accommodation::query();
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('address', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->paginate(15);
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'operator_id' => 'required|exists:tourism_operators,id',
+            'operator_id' => 'nullable|exists:tourism_operators,id',
             'name' => 'required|string|max:255',
-            'category' => 'required|integer|min:1|max:5',
+            'type' => 'required|string|max:255',
+            'category' => 'required|string|max:255',
             'total_rooms' => 'required|integer|min:1',
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'status' => 'required|string|max:255',
         ]);
 
         $accommodation = Accommodation::create($validated);
@@ -36,12 +48,14 @@ class AccommodationController extends Controller
     public function update(Request $request, Accommodation $accommodation)
     {
         $validated = $request->validate([
-            'operator_id' => 'sometimes|exists:tourism_operators,id',
+            'operator_id' => 'nullable|exists:tourism_operators,id',
             'name' => 'sometimes|string|max:255',
-            'category' => 'sometimes|integer|min:1|max:5',
+            'type' => 'sometimes|string|max:255',
+            'category' => 'sometimes|string|max:255',
             'total_rooms' => 'sometimes|integer|min:1',
             'phone' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'status' => 'sometimes|string|max:255',
         ]);
 
         $accommodation->update($validated);

@@ -9,10 +9,12 @@ class Accommodation extends Model
     protected $fillable = [
         'operator_id',
         'name',
+        'type',
         'category',
         'total_rooms',
         'phone',
-        'address'
+        'address',
+        'status'
     ];
 
     public function operator()

@@ -7,6 +7,7 @@ use App\Models\Visitor;
 use App\Models\TourismOperator;
 use App\Models\CertifiedGuide;
 use App\Models\TouristSite;
+use App\Models\Accommodation;
 
 class TestDataSeeder extends Seeder
 {
@@ -14,9 +15,24 @@ class TestDataSeeder extends Seeder
     {
         $faker = \Faker\Factory::create('es_PE');
         $sites = TouristSite::all();
+        $operators = TourismOperator::all();
 
         if ($sites->isEmpty()) {
             return;
+        }
+
+        // Create 40 Accommodations
+        for ($i = 0; $i < 40; $i++) {
+            Accommodation::create([
+                'operator_id' => $operators->isEmpty() ? null : $operators->random()->id,
+                'name' => $faker->company . ' ' . $faker->randomElement(['Hotel', 'Hostal', 'Palace', 'Inn', 'Resort', 'Suites']),
+                'type' => $faker->randomElement(['Hotel', 'Hostal', 'Albergue', 'Apart-Hotel']),
+                'category' => $faker->randomElement(['1 Estrella', '2 Estrellas', '3 Estrellas', '4 Estrellas', '5 Estrellas']),
+                'total_rooms' => rand(10, 150),
+                'phone' => $faker->phoneNumber,
+                'address' => $faker->address,
+                'status' => $faker->randomElement(['Activo', 'Mantenimiento', 'Inactivo'])
+            ]);
         }
 
         // Create 300 Visitors with diverse data

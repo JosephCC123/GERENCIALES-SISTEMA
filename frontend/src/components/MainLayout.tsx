@@ -9,7 +9,10 @@ import {
   BookOpen, 
   LogOut,
   Menu,
-  FileBarChart
+  FileBarChart,
+  Hotel,
+  ShieldCheck,
+  UserCog
 } from 'lucide-react';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -25,9 +28,12 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: MapPin, label: 'Sitios Turísticos', path: '/sites' },
     { icon: Users, label: 'Visitantes', path: '/visitors' },
+    { icon: Hotel, label: 'Hospedajes', path: '/accommodations' },
     { icon: Building2, label: 'Operadores', path: '/operators' },
     { icon: BookOpen, label: 'Guías', path: '/guides' },
     { icon: FileBarChart, label: 'Reportes', path: '/reports' },
+    { icon: ShieldCheck, label: 'Auditoría', path: '/audit' },
+    { icon: UserCog, label: 'Usuarios', path: '/users' },
   ];
 
   return (
