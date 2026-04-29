@@ -15,7 +15,7 @@ import api from '../lib/api';
 interface AuditLog {
   id: number;
   user_id: number;
-  user_name: string;
+  user?: { name: string };
   action: string;
   table_name: string;
   record_id: number;
@@ -88,7 +88,7 @@ export function AuditLogsPage() {
                     </div>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1 font-medium text-foreground/80">
-                        <User className="w-3 h-3" /> {log.user_name || 'Sistema'}
+                        <User className="w-3 h-3" /> {log.user?.name || 'Sistema'}
                       </span>
                       <span className="flex items-center gap-1">
                         <Clock className="w-3 h-3" /> {new Date(log.created_at).toLocaleString()}

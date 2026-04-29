@@ -21,12 +21,16 @@ use App\Http\Controllers\Api\DailyOccupancyController;
 use App\Http\Controllers\Api\CertifiedGuideController;
 use App\Http\Controllers\Api\SiteCapacityLogController;
 use App\Http\Controllers\Api\AuditLogController;
+use App\Http\Controllers\Api\UserController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user()->load('roles', 'institution');
     });
+
+    // Administración de Usuarios
+    Route::apiResource('users', UserController::class);
 
     // Módulo 2: Sitios Turísticos
     Route::apiResource('tourist-sites', TouristSiteController::class);
