@@ -15,28 +15,37 @@ class TouristSiteSeeder extends Seeder
         $dircetur = Institution::where('code', 'DIR-CUS-001')->first();
 
         TouristSite::create([
-            'name' => 'Machu Picchu',
+            'name' => 'Choquequirao',
             'type' => 'Archaeological',
-            'location' => 'Aguas Calientes',
-            'capacity' => 2500,
+            'location' => 'Santa Teresa',
+            'capacity' => 500,
             'status' => 'active',
             'managing_entity_id' => $dircetur->id
         ]);
 
         TouristSite::create([
-            'name' => 'Sacsayhuaman',
+            'name' => 'Ollantaytambo',
             'type' => 'Archaeological',
-            'location' => 'Cusco',
-            'capacity' => 1500,
+            'location' => 'Urubamba',
+            'capacity' => 1200,
             'status' => 'active',
             'managing_entity_id' => $dircetur->id
         ]);
 
         TouristSite::create([
-            'name' => 'Pisac',
+            'name' => 'Salineras de Maras',
+            'type' => 'Natural',
+            'location' => 'Maras',
+            'capacity' => 800,
+            'status' => 'active',
+            'managing_entity_id' => $dircetur->id
+        ]);
+
+        TouristSite::create([
+            'name' => 'Moray',
             'type' => 'Archaeological',
-            'location' => 'Calca',
-            'capacity' => 1000,
+            'location' => 'Maras',
+            'capacity' => 600,
             'status' => 'active',
             'managing_entity_id' => $dircetur->id
         ]);

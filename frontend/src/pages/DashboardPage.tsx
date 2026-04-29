@@ -92,19 +92,42 @@ export function DashboardPage() {
           </div>
         </div>
 
-        <div className="bg-card rounded-2xl border border-border p-6 flex flex-col items-center justify-center text-center space-y-4">
-          <div className="w-16 h-16 rounded-full bg-accent/20 flex items-center justify-center">
-            <MapIcon className="w-8 h-8 text-accent" />
+        <div className="bg-card rounded-2xl border border-border overflow-hidden h-[400px] relative group lg:col-span-2">
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31032.553974443!2d-71.9934177306233!3d-13.525251268393527!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x916e7f0d0e0e0e0e%3A0x0e0e0e0e0e0e0e0e!2sCusco%2C%20Peru!5e0!3m2!1sen!2spe!4v1714345000000!5m2!1sen!2spe" 
+            className="absolute inset-0 w-full h-full border-0 grayscale-[0.2] group-hover:grayscale-0 transition-all duration-700" 
+            style={{ filter: 'invert(90%) hue-rotate(180deg) brightness(95%) contrast(90%)' }}
+            allowFullScreen
+            loading="lazy"
+          ></iframe>
+          
+          <div className="absolute top-6 left-6 z-10 flex flex-col gap-2">
+            <div className="bg-background/90 backdrop-blur-xl p-4 rounded-2xl border border-border shadow-2xl">
+              <h2 className="text-lg font-bold flex items-center gap-2">
+                <MapIcon className="w-5 h-5 text-primary" />
+                Mapa de Gestión Turística
+              </h2>
+              <p className="text-xs text-muted-foreground mt-1">
+                Visualización de puntos críticos y flujos en Cusco
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <span className="bg-green-500/20 text-green-500 text-[10px] font-bold px-3 py-1 rounded-full border border-green-500/30 backdrop-blur-md">
+                ALTA DISPONIBILIDAD
+              </span>
+              <span className="bg-primary/20 text-primary text-[10px] font-bold px-3 py-1 rounded-full border border-primary/30 backdrop-blur-md">
+                LIVE DATA
+              </span>
+            </div>
           </div>
-          <div>
-            <h2 className="text-xl font-bold">Monitor de Capacidad</h2>
-            <p className="text-muted-foreground text-sm max-w-[250px] mx-auto mt-1">
-              Visualiza el estado de los principales sitios arqueológicos en tiempo real.
-            </p>
+
+          <div className="absolute bottom-6 right-6 z-10">
+            <button className="bg-primary text-primary-foreground px-6 py-2.5 rounded-full font-bold shadow-2xl shadow-primary/40 hover:scale-105 active:scale-95 transition-all flex items-center gap-2">
+              <ChevronRight className="w-4 h-4" />
+              Explorar Mapa Completo
+            </button>
           </div>
-          <button className="bg-primary text-primary-foreground px-6 py-2 rounded-full font-bold shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
-            Abrir Mapa
-          </button>
         </div>
       </div>
     </div>

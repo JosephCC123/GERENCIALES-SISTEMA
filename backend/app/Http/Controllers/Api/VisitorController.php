@@ -10,6 +10,8 @@ class VisitorController extends Controller
 {
     public function index()
     {
+        return Visitor::with('site')->paginate(15);
+    }
 
     /**
      * Store a newly created resource in storage.

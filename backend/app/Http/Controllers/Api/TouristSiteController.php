@@ -11,6 +11,18 @@ class TouristSiteController extends Controller
 {
     public function index()
     {
-        return response()->json(TouristSite::with('managingEntity')->get());
+        $sites = TouristSite::with('managingEntity')->paginate(15);
+        $sites->getCollection()->transform(function ($site) {
+            return [
+                'id' => $site->id,
+                'name' => $site->name,
+                'category' => $site->type,
+                'location' => $site->location,
+                'capacity_standard' => $site->capacity,
+                'admin_entity' => $site->managingEntity ? $site->managingEntity->name : 'SIN ENTIDAD',
+                'status' => $site->status,
+            ];
+        });
+        return $sites;
     }
 }
