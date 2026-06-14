@@ -42,6 +42,20 @@ return [
             'synchronous' => null,
         ],
 
+        'dw_mysql' => [
+            'driver' => 'mysql',
+            'host' => '127.0.0.1',
+            'port' => '3307',
+            'database' => 'cusco_turismo_dw',
+            'username' => 'root',
+            'password' => '12345',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'prefix' => '',
+            'strict' => true,
+            'engine' => null,
+        ],
+
         'mysql' => [
             'driver' => 'mysql',
             'url' => env('DB_URL'),

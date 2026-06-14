@@ -22,6 +22,15 @@ return new class extends Migration
             $table->time('entry_time');
             $table->time('exit_time')->nullable();
             $table->string('ticket_number')->nullable();
+            
+            // BI Enrichment Fields
+            $table->integer('age')->nullable();
+            $table->enum('gender', ['M', 'F', 'O'])->nullable();
+            $table->string('ticket_type')->nullable(); // Adulto, Estudiante, Niño
+            $table->string('payment_method')->nullable(); // Efectivo, Tarjeta, Online, Agencia
+            $table->string('purpose_of_visit')->nullable(); // Vacaciones, Negocios, Estudio, Evento, Otro
+            $table->string('weather_condition')->nullable(); // Soleado, Lluvioso, Nublado
+
             $table->timestamps();
         });
     }

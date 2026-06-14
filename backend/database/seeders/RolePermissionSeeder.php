@@ -63,5 +63,25 @@ class RolePermissionSeeder extends Seeder
         ]);
 
         $admin->roles()->attach($adminRole->id);
+
+        // 6. Create Executive User
+        $ejecutivo = User::create([
+            'name' => 'Ejecutivo SIG',
+            'email' => 'ejecutivo@cuscoturismo.gob.pe',
+            'password' => Hash::make('12345678'),
+            'institution_id' => $dircetur->id,
+            'status' => 'active'
+        ]);
+        $ejecutivo->roles()->attach($ejecutivoRole->id);
+
+        // 7. Create Operator User
+        $operador = User::create([
+            'name' => 'Operador Cusco',
+            'email' => 'operador@cuscoturismo.gob.pe',
+            'password' => Hash::make('12345678'),
+            'institution_id' => $dircetur->id,
+            'status' => 'active'
+        ]);
+        $operador->roles()->attach($operadorRole->id);
     }
 }

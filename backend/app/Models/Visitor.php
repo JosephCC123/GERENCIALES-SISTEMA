@@ -15,7 +15,13 @@ class Visitor extends Model
         'entry_date',
         'entry_time',
         'exit_time',
-        'ticket_number'
+        'ticket_number',
+        'age',
+        'gender',
+        'ticket_type',
+        'payment_method',
+        'purpose_of_visit',
+        'weather_condition'
     ];
 
     public function site()

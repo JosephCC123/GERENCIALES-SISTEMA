@@ -7,14 +7,17 @@ import {
   ShieldCheck, 
   Trash2,
   Edit2,
-  Search
+  Search,
+  Eye
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { debounce } from 'lodash-es';
+import { useAuthStore } from '../store/authStore';
 
 interface TouristSite {
   id: number;
@@ -33,6 +36,9 @@ export function SitesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingSite, setEditingSite] = useState<TouristSite | null>(null);
+  const navigate = useNavigate();
+  const user = useAuthStore(state => state.user);
+  const canEdit = user?.roles?.some((role: any) => role.slug === 'admin' || role.slug === 'operador') ?? false;
 
   const [formData, setFormData] = useState({
     name: '',
@@ -128,8 +134,9 @@ export function SitesPage() {
       <PageHeader 
         title="Sitios Turísticos" 
         description="Gestión y monitoreo de atractivos culturales y naturales."
-        buttonLabel="Nuevo Sitio"
+        buttonLabel={canEdit ? "Nuevo Sitio" : undefined}
         onButtonClick={() => {
+          if (!canEdit) return;
           setEditingSite(null);
           resetForm();
           setIsModalOpen(true);
@@ -156,26 +163,39 @@ export function SitesPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {sites.map((site) => (
             <Card key={site.id} className="p-6 hover:shadow-lg transition-shadow border-border overflow-hidden relative group">
-              <div className="absolute top-0 right-0 p-4 flex gap-2">
+              <div className="absolute top-0 right-0 p-4 flex gap-1 bg-gradient-to-l from-card via-card to-transparent pl-8">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="text-primary hover:bg-primary/10 rounded-xl"
-                  onClick={() => handleEdit(site)}
+                  className="text-secondary hover:bg-secondary/10 rounded-xl"
+                  onClick={() => navigate(`/sites/${site.id}`)}
+                  title="Ver Perfil"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Eye className="w-4 h-4" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-destructive hover:bg-destructive/10 rounded-xl"
-                  onClick={() => handleDelete(site.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                {canEdit && (
+                  <>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-primary hover:bg-primary/10 rounded-xl"
+                      onClick={() => handleEdit(site)}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-destructive hover:bg-destructive/10 rounded-xl"
+                      onClick={() => handleDelete(site.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </>
+                )}
               </div>
               
-              <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-4 pr-24">
                 <div className="p-3 rounded-xl bg-primary/10 text-primary">
                   <MapPin className="w-6 h-6" />
                 </div>

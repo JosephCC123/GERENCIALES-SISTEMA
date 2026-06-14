@@ -12,7 +12,9 @@ import {
   FileBarChart,
   Hotel,
   ShieldCheck,
-  UserCog
+  UserCog,
+  Settings,
+  Database
 } from 'lucide-react';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -24,17 +26,23 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     navigate('/login');
   };
 
+  const isAdmin = user?.roles?.some((role: any) => role.slug === 'admin') ?? false;
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
+    { icon: Database, label: 'Módulo BI', path: '/bi-management', adminOnly: true },
     { icon: MapPin, label: 'Sitios Turísticos', path: '/sites' },
     { icon: Users, label: 'Visitantes', path: '/visitors' },
     { icon: Hotel, label: 'Hospedajes', path: '/accommodations' },
     { icon: Building2, label: 'Operadores', path: '/operators' },
     { icon: BookOpen, label: 'Guías', path: '/guides' },
     { icon: FileBarChart, label: 'Reportes', path: '/reports' },
-    { icon: ShieldCheck, label: 'Auditoría', path: '/audit' },
-    { icon: UserCog, label: 'Usuarios', path: '/users' },
+    { icon: ShieldCheck, label: 'Auditoría', path: '/audit', adminOnly: true },
+    { icon: UserCog, label: 'Usuarios', path: '/users', adminOnly: true },
+    { icon: Settings, label: 'Configuración', path: '/settings', adminOnly: true },
   ];
+
+  const visibleMenuItems = menuItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -48,7 +56,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
         </div>
         
         <nav className="flex-1 px-4 space-y-2">
-          {menuItems.map((item) => (
+          {visibleMenuItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}

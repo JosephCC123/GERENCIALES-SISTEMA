@@ -15,6 +15,7 @@ import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { debounce } from 'lodash-es';
+import { useAuthStore } from '../store/authStore';
 
 interface Visitor {
   id: number;
@@ -36,12 +37,15 @@ interface Site {
 
 export function VisitorsPage() {
   const [visitors, setVisitors] = useState<Visitor[]>([]);
+  const [pagination, setPagination] = useState({ current_page: 1, last_page: 1, total: 0 });
   const [sites, setSites] = useState<Site[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingVisitor, setEditingVisitor] = useState<Visitor | null>(null);
+  const user = useAuthStore(state => state.user);
+  const canEdit = user?.roles?.some((role: any) => role.slug === 'admin' || role.slug === 'operador') ?? false;
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -54,11 +58,16 @@ export function VisitorsPage() {
     ticket_number: ''
   });
 
-  const fetchVisitors = async (search = '') => {
+  const fetchVisitors = async (search = '', page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get(`/visitors?search=${search}`);
+      const response = await api.get(`/visitors?search=${search}&page=${page}`);
       setVisitors(response.data.data || []);
+      setPagination({
+        current_page: response.data.current_page || 1,
+        last_page: response.data.last_page || 1,
+        total: response.data.total || 0
+      });
     } catch (error) {
       console.error('Error fetching visitors:', error);
     } finally {
@@ -82,7 +91,7 @@ export function VisitorsPage() {
 
   // Debounced search
   const debouncedSearch = useCallback(
-    debounce((term: string) => fetchVisitors(term), 500),
+    debounce((term: string) => fetchVisitors(term, 1), 500),
     []
   );
 
@@ -130,7 +139,7 @@ export function VisitorsPage() {
       setIsModalOpen(false);
       setEditingVisitor(null);
       resetForm();
-      fetchVisitors(searchTerm);
+      fetchVisitors(searchTerm, pagination.current_page);
     } catch (error) {
       console.error('Error saving visitor:', error);
       alert('Error al guardar registro');
@@ -157,8 +166,9 @@ export function VisitorsPage() {
       <PageHeader 
         title="Registro de Visitantes" 
         description="Listado y control de ingresos a los sitios turísticos."
-        buttonLabel="Registrar Entrada"
+        buttonLabel={canEdit ? "Registrar Entrada" : undefined}
         onButtonClick={() => {
+          if (!canEdit) return;
           setEditingVisitor(null);
           resetForm();
           setIsModalOpen(true);
@@ -206,7 +216,7 @@ export function VisitorsPage() {
                 <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nacionalidad</th>
                 <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Tipo</th>
                 <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Ubicación</th>
-                <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Acciones</th>
+                {canEdit && <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Acciones</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -258,32 +268,59 @@ export function VisitorsPage() {
                         <span className="text-sm font-bold text-foreground">{visitor.site?.name || 'N/A'}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-primary hover:bg-primary/10 rounded-xl"
-                          onClick={() => handleEdit(visitor)}
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="text-destructive hover:bg-destructive/10 rounded-xl"
-                          onClick={() => handleDelete(visitor.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
+                    {canEdit && (
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-primary hover:bg-primary/10 rounded-xl"
+                            onClick={() => handleEdit(visitor)}
+                          >
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-destructive hover:bg-destructive/10 rounded-xl"
+                            onClick={() => handleDelete(visitor.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
             </tbody>
           </table>
         </div>
+        {!loading && visitors.length > 0 && (
+          <div className="p-4 border-t border-border flex items-center justify-between bg-muted/20">
+            <span className="text-sm text-muted-foreground">
+              Mostrando página <span className="font-bold">{pagination.current_page}</span> de <span className="font-bold">{pagination.last_page}</span> ({pagination.total} registros)
+            </span>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page === 1}
+                onClick={() => fetchVisitors(searchTerm, pagination.current_page - 1)}
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={pagination.current_page === pagination.last_page}
+                onClick={() => fetchVisitors(searchTerm, pagination.current_page + 1)}
+              >
+                Siguiente
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <Modal 

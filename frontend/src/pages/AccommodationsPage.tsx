@@ -18,6 +18,7 @@ import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Label } from '../components/ui/label';
 import { debounce } from 'lodash-es';
+import { useAuthStore } from '../store/authStore';
 
 interface Accommodation {
   id: number;
@@ -37,6 +38,8 @@ export function AccommodationsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingItem, setEditingItem] = useState<Accommodation | null>(null);
+  const user = useAuthStore(state => state.user);
+  const canEdit = user?.roles?.some((role: any) => role.slug === 'admin' || role.slug === 'operador') ?? false;
   
   const [formData, setFormData] = useState({
     name: '',
@@ -138,8 +141,9 @@ export function AccommodationsPage() {
       <PageHeader 
         title="Gestión de Hospedajes" 
         description="Directorio de hoteles, hostales y alojamientos autorizados."
-        buttonLabel="Nuevo Establecimiento"
+        buttonLabel={canEdit ? "Nuevo Establecimiento" : undefined}
         onButtonClick={() => {
+          if (!canEdit) return;
           setEditingItem(null);
           resetForm();
           setIsModalOpen(true);
@@ -167,7 +171,7 @@ export function AccommodationsPage() {
                 <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Categoría</th>
                 <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Habitaciones</th>
                 <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Estado</th>
-                <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Acciones</th>
+                {canEdit && <th className="px-6 py-5 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Acciones</th>}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -212,16 +216,18 @@ export function AccommodationsPage() {
                         {item.status.toUpperCase()}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="text-primary rounded-xl">
-                          <Edit2 className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="text-destructive rounded-xl">
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
+                    {canEdit && (
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <Button variant="ghost" size="sm" onClick={() => handleEdit(item)} className="text-primary rounded-xl">
+                            <Edit2 className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDelete(item.id)} className="text-destructive rounded-xl">
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}

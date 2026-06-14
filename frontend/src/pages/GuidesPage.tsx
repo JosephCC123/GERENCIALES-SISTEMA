@@ -7,7 +7,10 @@ import {
   Award,
   Trash2,
   Edit2,
-  Search
+  Search,
+  Eye,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
@@ -15,6 +18,7 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { debounce } from 'lodash-es';
+import { useAuthStore } from '../store/authStore';
 
 interface Guide {
   id: number;
@@ -33,6 +37,11 @@ export function GuidesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingGuide, setEditingGuide] = useState<Guide | null>(null);
+  const user = useAuthStore(state => state.user);
+  const canEdit = user?.roles?.some((role: any) => role.slug === 'admin' || role.slug === 'operador') ?? false;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -43,11 +52,12 @@ export function GuidesPage() {
     status: 'Activo'
   });
 
-  const fetchGuides = async (search = '') => {
+  const fetchGuides = async (search = '', page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get(`/certified-guides?search=${search}`);
+      const response = await api.get(`/certified-guides?search=${search}&page=${page}`);
       setGuides(response.data.data || []);
+      setTotalPages(response.data.last_page || 1);
     } catch (error) {
       console.error('Error fetching guides:', error);
     } finally {
@@ -56,11 +66,14 @@ export function GuidesPage() {
   };
 
   useEffect(() => {
-    fetchGuides();
-  }, []);
+    fetchGuides(searchTerm, currentPage);
+  }, [currentPage]);
 
   const debouncedSearch = useCallback(
-    debounce((term: string) => fetchGuides(term), 500),
+    debounce((term: string) => {
+      setCurrentPage(1);
+      fetchGuides(term, 1);
+    }, 500),
     []
   );
 
@@ -131,8 +144,9 @@ export function GuidesPage() {
       <PageHeader 
         title="Guías Certificados" 
         description="Gestión de profesionales autorizados por DIRCETUR."
-        buttonLabel="Nuevo Guía"
+        buttonLabel={canEdit ? "Nuevo Guía" : undefined}
         onButtonClick={() => {
+          if (!canEdit) return;
           setEditingGuide(null);
           resetForm();
           setIsModalOpen(true);
@@ -149,56 +163,120 @@ export function GuidesPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {loading ? (
-          [1, 2, 3, 4, 5, 6, 7, 8].map(i => <div key={i} className="h-64 bg-muted animate-pulse rounded-2xl" />)
-        ) : (
-          guides.map((guide) => (
-            <Card key={guide.id} className="p-6 border-border flex flex-col items-center text-center relative group">
-              <div className="absolute top-4 right-4 flex gap-1">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-primary hover:bg-primary/10 rounded-xl"
-                  onClick={() => handleEdit(guide)}
-                >
-                  <Edit2 className="w-4 h-4" />
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="text-destructive hover:bg-destructive/10 rounded-xl"
-                  onClick={() => handleDelete(guide.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
-
-              <div className="w-20 h-20 rounded-full bg-accent/10 text-accent flex items-center justify-center mb-4">
-                <Award className="w-10 h-10" />
-              </div>
-
-              <h3 className="font-bold text-lg">{guide.full_name}</h3>
-              <p className="text-xs text-primary font-bold uppercase tracking-tighter mt-1">
-                LIC: {guide.license_number}
-              </p>
-
-              <div className="w-full mt-6 space-y-3">
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <Languages className="w-4 h-4" />
-                  <span className="truncate">{guide.languages}</span>
-                </div>
-                <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-                  <BookOpen className="w-4 h-4" />
-                  <span className="truncate">{guide.specialization}</span>
-                </div>
-              </div>
-
-              <button className="mt-6 w-full py-2 bg-muted hover:bg-primary/10 hover:text-primary rounded-lg text-sm font-bold transition-colors">
-                Ver Perfil
-              </button>
-            </Card>
-          ))
+      <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-muted/50 text-muted-foreground uppercase text-xs">
+              <tr>
+                <th className="px-6 py-4 font-medium">Guía</th>
+                <th className="px-6 py-4 font-medium">Licencia</th>
+                <th className="px-6 py-4 font-medium">Especialidad</th>
+                <th className="px-6 py-4 font-medium">Idiomas</th>
+                <th className="px-6 py-4 font-medium text-right">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {loading ? (
+                Array(5).fill(0).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-3/4"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-1/2"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-24"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-32"></div></td>
+                    <td className="px-6 py-4"><div className="h-8 bg-muted rounded w-20 ml-auto"></div></td>
+                  </tr>
+                ))
+              ) : guides.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-8 text-center text-muted-foreground">
+                    No se encontraron guías
+                  </td>
+                </tr>
+              ) : (
+                guides.map((guide) => (
+                  <tr key={guide.id} className="hover:bg-muted/30 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-accent/10 text-accent flex items-center justify-center shrink-0">
+                          <Award className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-foreground">{guide.full_name}</p>
+                          <span className={`inline-flex mt-1 items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium ${guide.status === 'Activo' ? 'bg-green-500/10 text-green-600' : 'bg-yellow-500/10 text-yellow-600'}`}>
+                            {guide.status}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 font-mono font-medium">{guide.license_number}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{guide.specialization}</td>
+                    <td className="px-6 py-4 text-muted-foreground">{guide.languages}</td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-secondary hover:bg-secondary/10 h-8 w-8 p-0"
+                          title="Ver Perfil"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        {canEdit && (
+                          <>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-primary hover:bg-primary/10 h-8 w-8 p-0"
+                              onClick={() => handleEdit(guide)}
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
+                              onClick={() => handleDelete(guide.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+        
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-border flex items-center justify-between bg-muted/20">
+            <span className="text-sm text-muted-foreground">
+              Página {currentPage} de {totalPages}
+            </span>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === 1 || loading}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                className="h-8"
+              >
+                <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                disabled={currentPage === totalPages || loading}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                className="h-8"
+              >
+                Siguiente <ChevronRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          </div>
         )}
       </div>
 

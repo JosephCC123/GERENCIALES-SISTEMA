@@ -7,14 +7,19 @@ import {
   Phone, 
   Trash2,
   Edit2,
-  Search
+  Search,
+  Eye,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { Modal } from '../components/ui/Modal';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { debounce } from 'lodash-es';
+import { useAuthStore } from '../store/authStore';
 
 interface Operator {
   id: number;
@@ -35,6 +40,12 @@ export function OperatorsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingOperator, setEditingOperator] = useState<Operator | null>(null);
+  const navigate = useNavigate();
+  const user = useAuthStore(state => state.user);
+  const canEdit = user?.roles?.some((role: any) => role.slug === 'admin' || role.slug === 'operador') ?? false;
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const [formData, setFormData] = useState({
     business_name: '',
@@ -47,11 +58,12 @@ export function OperatorsPage() {
     status: 'Activo'
   });
 
-  const fetchOperators = async (search = '') => {
+  const fetchOperators = async (search = '', page = 1) => {
     try {
       setLoading(true);
-      const response = await api.get(`/tourism-operators?search=${search}`);
+      const response = await api.get(`/tourism-operators?search=${search}&page=${page}`);
       setOperators(response.data.data || []);
+      setTotalPages(response.data.last_page || 1);
     } catch (error) {
       console.error('Error fetching operators:', error);
     } finally {
@@ -60,11 +72,14 @@ export function OperatorsPage() {
   };
 
   useEffect(() => {
-    fetchOperators();
-  }, []);
+    fetchOperators(searchTerm, currentPage);
+  }, [currentPage]);
 
   const debouncedSearch = useCallback(
-    debounce((term: string) => fetchOperators(term), 500),
+    debounce((term: string) => {
+      setCurrentPage(1);
+      fetchOperators(term, 1);
+    }, 500),
     []
   );
 
@@ -139,8 +154,9 @@ export function OperatorsPage() {
       <PageHeader 
         title="Operadores Turísticos" 
         description="Directorio de agencias y operadores certificados."
-        buttonLabel="Nuevo Operador"
+        buttonLabel={canEdit ? "Nuevo Operador" : undefined}
         onButtonClick={() => {
+          if (!canEdit) return;
           setEditingOperator(null);
           resetForm();
           setIsModalOpen(true);
@@ -157,66 +173,134 @@ export function OperatorsPage() {
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {loading ? (
-          [1, 2, 3, 4].map(i => <div key={i} className="h-40 bg-muted animate-pulse rounded-2xl" />)
-        ) : (
-          operators.map((op) => (
-            <Card key={op.id} className="p-6 border-border group hover:border-primary/50 transition-colors">
-              <div className="flex justify-between items-start">
-                <div className="flex gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
-                    <Building2 className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-xl">{op.business_name}</h3>
-                    <p className="text-sm text-muted-foreground capitalize">{op.operator_type}</p>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-primary hover:bg-primary/10 rounded-xl"
-                    onClick={() => handleEdit(op)}
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="text-destructive hover:bg-destructive/10 rounded-xl"
-                    onClick={() => handleDelete(op.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
+        <div className="bg-card rounded-2xl border border-border shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm text-left">
+              <thead className="bg-muted/50 text-muted-foreground uppercase text-xs">
+                <tr>
+                  <th className="px-6 py-4 font-medium">Operador</th>
+                  <th className="px-6 py-4 font-medium">Tipo</th>
+                  <th className="px-6 py-4 font-medium">RUC</th>
+                  <th className="px-6 py-4 font-medium">Contacto</th>
+                  <th className="px-6 py-4 font-medium">Estado</th>
+                  <th className="px-6 py-4 font-medium text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {loading ? (
+                  Array(5).fill(0).map((_, i) => (
+                    <tr key={i} className="animate-pulse">
+                      <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-3/4"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-1/2"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-24"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-32"></div></td>
+                      <td className="px-6 py-4"><div className="h-4 bg-muted rounded w-16"></div></td>
+                      <td className="px-6 py-4"><div className="h-8 bg-muted rounded w-20 ml-auto"></div></td>
+                    </tr>
+                  ))
+                ) : operators.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-8 text-center text-muted-foreground">
+                      No se encontraron operadores
+                    </td>
+                  </tr>
+                ) : (
+                  operators.map((op) => (
+                    <tr key={op.id} className="hover:bg-muted/30 transition-colors">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center shrink-0">
+                            <Building2 className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <p className="font-semibold text-foreground">{op.business_name}</p>
+                            <p className="text-xs text-muted-foreground">{op.license_number}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 capitalize">{op.operator_type}</td>
+                      <td className="px-6 py-4 font-mono">{op.ruc}</td>
+                      <td className="px-6 py-4">
+                        <div className="flex flex-col text-xs text-muted-foreground">
+                          {op.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" /> {op.email}</span>}
+                          {op.phone && <span className="flex items-center gap-1 mt-1"><Phone className="w-3 h-3" /> {op.phone}</span>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${op.status === 'Activo' ? 'bg-green-500/10 text-green-600' : 'bg-yellow-500/10 text-yellow-600'}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${op.status === 'Activo' ? 'bg-green-500' : 'bg-yellow-500'}`} />
+                          {op.status}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            className="text-secondary hover:bg-secondary/10 h-8 w-8 p-0"
+                            onClick={() => navigate(`/operators/${op.id}`)}
+                            title="Ver Expediente"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          {canEdit && (
+                            <>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-primary hover:bg-primary/10 h-8 w-8 p-0"
+                                onClick={() => handleEdit(op)}
+                              >
+                                <Edit2 className="w-4 h-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-destructive hover:bg-destructive/10 h-8 w-8 p-0"
+                                onClick={() => handleDelete(op.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="p-4 border-t border-border flex items-center justify-between bg-muted/20">
+              <span className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </span>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={currentPage === 1 || loading}
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  className="h-8"
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" /> Anterior
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  disabled={currentPage === totalPages || loading}
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  className="h-8"
+                >
+                  Siguiente <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-6">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Mail className="w-4 h-4 shrink-0" />
-                  <span className="truncate">{op.email || 'N/A'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <Phone className="w-4 h-4" />
-                  <span>{op.phone}</span>
-                </div>
-              </div>
-
-              <div className="mt-6 flex items-center justify-between">
-                <span className="text-xs text-muted-foreground font-medium">RUC: {op.ruc}</span>
-                <div className="flex gap-2 items-center">
-                  <span className={`w-2 h-2 rounded-full ${op.status === 'Activo' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]' : 'bg-yellow-500'}`} />
-                  <span className={`text-[10px] font-bold uppercase ${op.status === 'Activo' ? 'text-green-600' : 'text-yellow-600'}`}>
-                    {op.status}
-                  </span>
-                </div>
-              </div>
-            </Card>
-          ))
-        )}
-      </div>
+            </div>
+          )}
+        </div>
 
       <Modal 
         isOpen={isModalOpen} 

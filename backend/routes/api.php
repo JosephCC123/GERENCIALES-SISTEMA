@@ -22,12 +22,23 @@ use App\Http\Controllers\Api\CertifiedGuideController;
 use App\Http\Controllers\Api\SiteCapacityLogController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\BiManagementController;
+use App\Http\Controllers\Api\ReportController;
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/user', function (Request $request) {
         return $request->user()->load('roles', 'institution');
     });
+
+    // Reportes Avanzados
+    Route::get('/reports/advanced', [ReportController::class, 'getAdvancedReportData']);
+
+    // Módulo Gerencial BI
+    Route::get('/bi/compare-data', [BiManagementController::class, 'compareData']);
+    Route::post('/bi/execute-etl', [BiManagementController::class, 'executeEtl']);
+    Route::get('/bi/table-structures', [BiManagementController::class, 'tableStructures']);
+    Route::post('/bi/query-by-id', [BiManagementController::class, 'queryById']);
 
     // Administración de Usuarios
     Route::apiResource('users', UserController::class);
