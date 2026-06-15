@@ -101,11 +101,48 @@ export function ReportsPage() {
       // Wait a bit for the chart to render in the DOM
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      // 3. Capture Chart with html2canvas
+      // 3. Capture Chart with html2canvas (with oklch override safety)
       let base64Image = '';
       if (chartContainerRef.current) {
-         const canvas = await html2canvas(chartContainerRef.current, { backgroundColor: '#ffffff', scale: 2 });
-         base64Image = canvas.toDataURL('image/png');
+        const originalGetComputedStyle = window.getComputedStyle;
+        const replaceOklch = (val: any) => {
+          if (typeof val === 'string' && val.includes('oklch')) {
+            if (val.includes('oklch(0.9') || val.includes('oklch(1')) {
+              return '#ffffff';
+            }
+            if (val.includes('oklch(0.2') || val.includes('oklch(0.1') || val.includes('oklch(0.3')) {
+              return '#0f172a';
+            }
+            return '#3b82f6';
+          }
+          return val;
+        };
+
+        window.getComputedStyle = function(elt: Element, pseudoElt?: string | null) {
+          const style = originalGetComputedStyle(elt, pseudoElt);
+          return new Proxy(style, {
+            get(target, prop) {
+              const value = Reflect.get(target, prop);
+              if (typeof value === 'function') {
+                return value.bind(target);
+              }
+              if (prop === 'getPropertyValue') {
+                return (propertyName: string) => {
+                  const val = target.getPropertyValue(propertyName);
+                  return replaceOklch(val);
+                };
+              }
+              return replaceOklch(value);
+            }
+          });
+        };
+
+        try {
+          const canvas = await html2canvas(chartContainerRef.current, { backgroundColor: '#ffffff', scale: 2 });
+          base64Image = canvas.toDataURL('image/png');
+        } finally {
+          window.getComputedStyle = originalGetComputedStyle;
+        }
       }
 
       // 4. Generate Excel using ExcelJS
