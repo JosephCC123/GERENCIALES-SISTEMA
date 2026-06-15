@@ -34,6 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Reportes Avanzados
     Route::get('/bi/reports', [ReportController::class, 'getAdvancedReportData']);
     Route::get('/bi/reports/advanced', [ReportController::class, 'getAdvancedReportData']);
+    Route::get('/bi/dw-kpis', [ReportController::class, 'getDwKpiData']);
 
     // Módulo Gerencial BI
     Route::get('/bi/compare-data', [BiManagementController::class, 'compareData']);

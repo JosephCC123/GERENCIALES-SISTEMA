@@ -13,6 +13,7 @@ import { SiteProfilePage } from './pages/SiteProfilePage';
 import { OperatorProfilePage } from './pages/OperatorProfilePage';
 import { SettingsPage } from './pages/SettingsPage';
 import BiManagementPage from './pages/BiManagementPage';
+import { DwKpisPage } from './pages/DwKpisPage';
 import { useAuthStore } from './store/authStore';
 import { MainLayout } from './components/MainLayout';
 
@@ -38,6 +39,7 @@ function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
       <Route path="/bi-management" element={<ProtectedRoute><RoleGuard allowedRoles={['admin']}><BiManagementPage /></RoleGuard></ProtectedRoute>} />
+      <Route path="/dw-kpis" element={<ProtectedRoute><DwKpisPage /></ProtectedRoute>} />
       <Route path="/sites" element={<ProtectedRoute><SitesPage /></ProtectedRoute>} />
       <Route path="/sites/:id" element={<ProtectedRoute><SiteProfilePage /></ProtectedRoute>} />
       <Route path="/visitors" element={<ProtectedRoute><VisitorsPage /></ProtectedRoute>} />

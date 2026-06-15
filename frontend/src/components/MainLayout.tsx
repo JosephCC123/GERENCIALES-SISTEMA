@@ -7,14 +7,15 @@ import {
   Users, 
   Building2, 
   BookOpen, 
-  LogOut,
-  Menu,
-  FileBarChart,
-  Hotel,
-  ShieldCheck,
-  UserCog,
-  Settings,
-  Database
+  LogOut, 
+  Menu, 
+  FileBarChart, 
+  Hotel, 
+  ShieldCheck, 
+  UserCog, 
+  Settings, 
+  Database,
+  TrendingUp
 } from 'lucide-react';
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
@@ -31,6 +32,7 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: Database, label: 'Módulo BI', path: '/bi-management', adminOnly: true },
+    { icon: TrendingUp, label: 'KPIs DW (OLAP)', path: '/dw-kpis' },
     { icon: MapPin, label: 'Sitios Turísticos', path: '/sites' },
     { icon: Users, label: 'Visitantes', path: '/visitors' },
     { icon: Hotel, label: 'Hospedajes', path: '/accommodations' },
