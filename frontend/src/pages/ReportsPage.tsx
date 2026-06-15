@@ -373,9 +373,9 @@ export function ReportsPage() {
             Gráfico Analítico: {activeReport.toUpperCase()}
           </h2>
           {chartData.length > 0 && (
-            <ResponsiveContainer width="100%" height={300}>
+            <div style={{ width: '800px', height: '300px' }}>
                 {activeReport === 'general' || activeReport === 'capacity' ? (
-                  <BarChart data={chartData}>
+                  <BarChart width={800} height={300} data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -383,7 +383,7 @@ export function ReportsPage() {
                     <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 ) : activeReport === 'occupancy' ? (
-                  <AreaChart data={chartData}>
+                  <AreaChart width={800} height={300} data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
@@ -391,7 +391,7 @@ export function ReportsPage() {
                     <Area type="monotone" dataKey="rate" stroke="#10b981" fill="#10b981" fillOpacity={0.3} />
                   </AreaChart>
                 ) : (
-                  <PieChart>
+                  <PieChart width={800} height={300}>
                     <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={100} label>
                       {chartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -401,7 +401,7 @@ export function ReportsPage() {
                     <Legend />
                   </PieChart>
                 )}
-            </ResponsiveContainer>
+            </div>
           )}
         </div>
       </div>

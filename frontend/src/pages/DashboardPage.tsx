@@ -8,7 +8,9 @@ import {
   Users,
   Globe,
   ArrowUpRight,
-  AlertTriangle
+  AlertTriangle,
+  Home,
+  Heart
 } from 'lucide-react';
 import api from '../lib/api';
 import { 
@@ -87,8 +89,11 @@ export function DashboardPage() {
   const iconsMap: Record<string, any> = {
     'Visitantes Hoy': TrendingUp,
     'Sitios Turísticos': MapIcon,
-    'Operadores Activos': Activity,
+    'Operadores Activos': Globe,
     'Guías Certificados': Users,
+    'Hospedajes Activos': Home,
+    'Ocupación Hotelera': Calendar,
+    'Salud Operativa': Heart,
   };
 
   return (
@@ -140,9 +145,9 @@ export function DashboardPage() {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {loading ? (
-          [1, 2, 3, 4].map(i => (
+          [1, 2, 3, 4, 5, 6, 7].map(i => (
             <div key={i} className="h-40 bg-muted animate-pulse rounded-2xl" />
           ))
         ) : (

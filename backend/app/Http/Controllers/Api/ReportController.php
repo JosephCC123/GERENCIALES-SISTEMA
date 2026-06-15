@@ -32,7 +32,14 @@ class ReportController extends Controller
                 );
 
             if ($request->has('start_date') && $request->has('end_date')) {
-                $query->whereBetween('dim_time.date', [$request->start_date, $request->end_date]);
+                $start = $request->start_date;
+                $end = $request->end_date;
+                if ($start > $end) {
+                    $tmp = $start;
+                    $start = $end;
+                    $end = $tmp;
+                }
+                $query->whereBetween('dim_time.date', [$start, $end]);
             }
             if ($request->has('site_id') && $request->site_id != 'all') {
                 $query->where('dim_tourist_site.site_id', $request->site_id);
@@ -62,7 +69,14 @@ class ReportController extends Controller
                 );
 
             if ($request->has('start_date') && $request->has('end_date')) {
-                $query->whereBetween('dim_time.date', [$request->start_date, $request->end_date]);
+                $start = $request->start_date;
+                $end = $request->end_date;
+                if ($start > $end) {
+                    $tmp = $start;
+                    $start = $end;
+                    $end = $tmp;
+                }
+                $query->whereBetween('dim_time.date', [$start, $end]);
             }
             if ($request->has('accommodation_type') && $request->accommodation_type != 'all') {
                 $query->where('dim_accommodation.type', $request->accommodation_type);
@@ -87,7 +101,14 @@ class ReportController extends Controller
                 ->groupBy('dim_time.date', 'dim_tourist_site.name', 'dim_tourist_site.capacity');
 
             if ($request->has('start_date') && $request->has('end_date')) {
-                $query->whereBetween('dim_time.date', [$request->start_date, $request->end_date]);
+                $start = $request->start_date;
+                $end = $request->end_date;
+                if ($start > $end) {
+                    $tmp = $start;
+                    $start = $end;
+                    $end = $tmp;
+                }
+                $query->whereBetween('dim_time.date', [$start, $end]);
             }
             if ($request->has('site_id') && $request->site_id != 'all') {
                 $query->where('dim_tourist_site.site_id', $request->site_id);
